@@ -1,0 +1,3 @@
+{
+  "extends": "@ofry/config/tsconfig.base.json"
+}
