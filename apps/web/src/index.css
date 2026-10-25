@@ -1,1 +1,56 @@
 @import "@ofry/ui/globals.css";
+
+/* Ofry brand: a confident blue, like the big Nordic marketplaces. */
+:root {
+  --primary: oklch(0.55 0.21 262);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.55 0.21 262);
+  --brand-soft: oklch(0.96 0.03 262);
+  --price: oklch(0.2 0 0);
+}
+
+.dark {
+  --primary: oklch(0.68 0.17 262);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.68 0.17 262);
+  --brand-soft: oklch(0.26 0.05 262);
+  --price: oklch(0.98 0 0);
+}
+
+@theme inline {
+  --color-brand-soft: var(--brand-soft);
+  --color-price: var(--price);
+}
+
+@layer components {
+  .field {
+    @apply h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50;
+  }
+  textarea.field {
+    @apply h-auto min-h-32 py-2;
+  }
+  .btn {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium whitespace-nowrap transition select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  .btn-outline {
+    @apply border border-border bg-background hover:bg-muted;
+  }
+  .btn-ghost {
+    @apply hover:bg-muted;
+  }
+  .btn-danger {
+    @apply bg-destructive/10 text-destructive hover:bg-destructive/20;
+  }
+  .btn-sm {
+    @apply h-8 px-3 text-xs;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium;
+  }
+  .panel {
+    @apply rounded-xl border border-border bg-card;
+  }
+}

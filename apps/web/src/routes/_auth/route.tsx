@@ -1,31 +1,27 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { useState } from "react";
 
-import SignInForm from "@/components/sign-in-form";
-import SignUpForm from "@/components/sign-up-form";
+import { AuthCard } from "@/components/auth-card";
+import Loader from "@/components/loader";
 
+/** Pages under this layout require an account; signing in renders the page in place. */
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
 });
 
 function AuthLayout() {
-  const [showSignIn, setShowSignIn] = useState(false);
-
   return (
     <>
       <Authenticated>
         <Outlet />
       </Authenticated>
       <Unauthenticated>
-        {showSignIn ? (
-          <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-        ) : (
-          <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
-        )}
+        <div className="px-4">
+          <AuthCard intro="Ai nevoie de un cont pentru a continua. Durează mai puțin de un minut." />
+        </div>
       </Unauthenticated>
       <AuthLoading>
-        <div>Loading...</div>
+        <Loader />
       </AuthLoading>
     </>
   );

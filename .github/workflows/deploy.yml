@@ -1,0 +1,61 @@
+name: Deploy
+
+# Deploys Convex functions and the web app (Cloudflare Workers via Alchemy) on every push to main.
+# Required repository secrets: CONVEX_DEPLOY_KEY, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ALCHEMY_PASSWORD
+# Required repository variables: VITE_CONVEX_URL, VITE_CONVEX_SITE_URL
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check deploy configuration
+        id: config
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CONVEX_DEPLOY_KEY" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::notice::Deploy secrets are not configured yet; skipping deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        if: steps.config.outputs.ready == 'true'
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+        if: steps.config.outputs.ready == 'true'
+      - name: Deploy Convex backend
+        if: steps.config.outputs.ready == 'true'
+        working-directory: packages/backend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: bunx convex deploy --yes
+      - name: Deploy web app to Cloudflare
+        if: steps.config.outputs.ready == 'true'
+        working-directory: packages/infra
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
+          VITE_CONVEX_SITE_URL: ${{ vars.VITE_CONVEX_SITE_URL }}
+          NODE_ENV: production
+        run: bunx alchemy deploy --stage prod --yes --no-input

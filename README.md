@@ -1,119 +1,59 @@
-# ofry
+# Ofry.ro
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Convex, and more.
+A general classifieds marketplace for Romania, modeled on finn.no: listings across categories, full text search with filters, ad posting with photos, favorites and buyer–seller messaging.
 
-## Features
+Built with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack): React + TanStack Router, Convex (database, functions, file storage), Better Auth, Tailwind, PWA, Turborepo, deployed to Cloudflare with Alchemy.
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Convex** - Reactive backend-as-a-service platform
-- **Authentication** - Better-Auth
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
+## What's in the MVP
 
-## Getting Started
+- **Home**: search, category grid with live counts, newest listings
+- **Search** (`/search`): full text search, category/subcategory, county, price range, condition, sorting, infinite "load more"
+- **Listing page** (`/listing/:id`): photo gallery, specs (cars: year, km, fuel, gearbox; real estate: rooms, area), seller card, phone reveal, contact form, share, favorite
+- **Post / edit ad** (`/new`, `/edit/:id`): up to 10 photos uploaded to Convex storage, category specific fields
+- **My ads** (`/my-ads`): mark sold, deactivate/reactivate, delete
+- **Favorites** (`/favorites`) and **Messages** (`/messages`) with unread badges, realtime via Convex
+- **Seller page** (`/seller/:id`)
 
-First, install the dependencies:
+UI copy is Romanian and prices are in lei.
+
+## Project layout
+
+```
+apps/web               React app (routes in src/routes)
+packages/backend       Convex functions and schema (convex/)
+  convex/lib/constants Categories, counties, shared with the web app
+packages/infra         Alchemy stack that deploys the web app to Cloudflare
+packages/ui            Shared shadcn/ui primitives
+```
+
+## Local development
 
 ```bash
 bun install
+bun run dev:setup          # create/link a Convex project (writes packages/backend/.env.local)
+
+cd packages/backend
+bunx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
+bunx convex env set SITE_URL http://localhost:3001
+bunx convex run seed:run   # optional: demo listings
+cd ../..
 ```
 
-## Convex Setup
-
-This project uses Convex as a backend. You'll need to set up Convex before running the app:
-
-```bash
-bun run dev:setup
-```
-
-Follow the prompts to create a new Convex project and connect it to your application.
-
-Copy environment variables from `packages/backend/.env.local` to `apps/*/.env`.
-
-Then, run the development server:
-
-```bash
-bun run dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Your app will connect to the Convex cloud backend automatically.
-
-## UI Customization
-
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
-
-```tsx
-import { Button } from "@ofry/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Environment Configuration
-
-Each app owns its environment schema in `.env.schema`. Varlock generates `src/env.ts` during installation; run `bun run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
-
-Import the generated `ENV` accessor in application code. Shared database and auth packages receive configuration or initialized clients from the application. See [Varlock's monorepo guide](https://varlock.dev/guides/monorepos/).
-
-For Cloudflare, Alchemy loads and validates deployment inputs with `varlock/auto-load` in its Node/Bun deployment process. Worker code reads native bindings; web clients use the framework's public env API through `src/env.public.ts` where needed. Alchemy supplies resource URLs and managed database credentials. In-Worker Varlock protections are deferred until an official Alchemy integration is available; see [the non-Wrangler deployment guidance](https://varlock.dev/integrations/cloudflare/#non-wrangler-deploy-tools-alchemy-sst-pulumi).
-
-Bun's automatic env loading is disabled in `bunfig.toml`; the framework integration or server bootstrap loads Varlock. Node deployments must include Varlock and its dependencies alongside the app schema.
-
-Run standalone Node/Bun tools that use Varlock from the owning app directory so they load that app's schema and env files. `env:generate` only generates TypeScript files; it does not initialize environment values in a subsequent command.
-
-## Deployment
-
-### Alchemy
-
-- Target: web on Cloudflare
-- Configure provider accounts: `cd packages/infra && bunx alchemy profile edit`
-- Dev: bun run dev
-- Deploy: bun run deploy
-- Destroy: bun run destroy
-
-`alchemy profile edit` stores the selected Axiom, Cloudflare, Neon, PlanetScale, and/or Prisma provider profiles under `~/.alchemy`; no provider-specific setup command is required by this scaffold.
-
-Deploys are staged and default to a personal `dev_<username>` stage. For production, run the deploy with an explicit stage from `packages/infra`:
-
-```bash
-cd packages/infra && bunx alchemy deploy --stage production
-```
-
-## Project Structure
+Put the Convex URLs in `apps/web/.env.local`:
 
 ```
-ofry/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── backend/     # Convex backend functions and schema
+VITE_CONVEX_URL=https://<your-deployment>.convex.cloud
+VITE_CONVEX_SITE_URL=https://<your-deployment>.convex.site
 ```
 
-## Available Scripts
+Then `bun run dev` and open http://localhost:3001.
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:setup`: Setup and configure your Convex project
-- `bun run check-types`: Check TypeScript types across all apps
-- `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
+`packages/backend/convex/_generated` is regenerated by `convex dev`; commit the result.
+
+## CI and deploys (GitHub Actions)
+
+- `.github/workflows/ci.yml` typechecks Convex and builds the web app on every push and PR.
+- `.github/workflows/deploy.yml` deploys Convex and then the web app to Cloudflare on every push to `main`. It skips itself until these are configured in the repo settings:
+  - Secrets: `CONVEX_DEPLOY_KEY` (Convex dashboard → production deployment → Settings → Deploy key), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ALCHEMY_PASSWORD` (any random string, keep it stable)
+  - Variables: `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL` (production deployment URLs)
+  - On the production Convex deployment, set `BETTER_AUTH_SECRET` and `SITE_URL=https://ofry.ro` once.

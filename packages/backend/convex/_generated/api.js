@@ -1,6 +1,25 @@
 /* eslint-disable */
-import { anyApi, componentsGeneric } from "convex/server";
+  /**
+   * Generated `api` utility.
+   *
+   * THIS CODE IS AUTOMATICALLY GENERATED.
+   *
+   * To regenerate, run `npx convex dev`.
+   * @module
+   */
+  
+  import { anyApi } from "convex/server";
 
-export const api = anyApi;
-export const internal = anyApi;
+  /**
+   * A utility for referencing Convex functions in your app's API.
+   *
+   * Usage:
+   * ```js
+   * const myFunctionReference = api.myModule.myFunction;
+   * ```
+   */
+  export const api = anyApi;
+  export const internal = anyApi;
+  
+import { componentsGeneric } from "convex/server";
 export const components = componentsGeneric();
