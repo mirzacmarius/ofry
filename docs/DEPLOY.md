@@ -39,6 +39,7 @@ For each value, type the **Name** exactly as written here (capital letters, unde
 
 1. **Account ID.** Go to <https://dash.cloudflare.com> and open **Workers & Pages** in the left sidebar. The **Account ID** is in the right-hand panel, with a copy button. It's also the long hex string in the browser address bar (`dash.cloudflare.com/<account-id>/...`). Save it as the **secret** `CLOUDFLARE_ACCOUNT_ID`.
 2. **API token.** Go to <https://dash.cloudflare.com/profile/api-tokens>, click **Create Token**, and next to the **Edit Cloudflare Workers** template click **Use template**.
+   - **Permissions**: keep the template rows and click **+ Add more** to add **Account → Secrets Store → Edit**. Alchemy keeps its deployment records in a Cloudflare Secrets Store, and without this permission the deploy fails with `Unauthorized: Authentication error`.
    - **Account Resources**: Include → your account.
    - **Zone Resources**: Include → All zones (or just `ofry.ro` once the domain is on Cloudflare).
    - Click **Continue to summary**, then **Create Token**, and copy the token. Cloudflare shows it only once. Save it as the **secret** `CLOUDFLARE_API_TOKEN`.
@@ -62,7 +63,7 @@ Alchemy is the tool that deploys the website. It needs a password to encrypt its
 | `VITE_CONVEX_URL` | Variable | Convex → Production → Settings → Deployment URL (`.convex.cloud`) |
 | `VITE_CONVEX_SITE_URL` | Variable | Convex → Production → Settings → HTTP Actions URL (`.convex.site`) |
 | `CLOUDFLARE_ACCOUNT_ID` | Secret | Cloudflare → Workers & Pages → Account ID |
-| `CLOUDFLARE_API_TOKEN` | Secret | Cloudflare → Profile → API Tokens → "Edit Cloudflare Workers" template |
+| `CLOUDFLARE_API_TOKEN` | Secret | Cloudflare → Profile → API Tokens → "Edit Cloudflare Workers" template + Account → Secrets Store → Edit |
 | `ALCHEMY_PASSWORD` | Secret | Any random string you make up |
 | `BETTER_AUTH_SECRET` | **Convex** env var | Any random string you make up |
 | `SITE_URL` | **Convex** env var | The site's address (workers.dev URL for now, later `https://ofry.ro`) |
