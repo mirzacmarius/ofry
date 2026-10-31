@@ -53,7 +53,4 @@ Then `bun run dev` and open http://localhost:3001.
 ## CI and deploys (GitHub Actions)
 
 - `.github/workflows/ci.yml` typechecks Convex and builds the web app on every push and PR.
-- `.github/workflows/deploy.yml` deploys Convex and then the web app to Cloudflare on every push to `main`. It skips itself until these are configured in the repo settings:
-  - Secrets: `CONVEX_DEPLOY_KEY` (Convex dashboard → production deployment → Settings → Deploy key), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ALCHEMY_PASSWORD` (any random string, keep it stable)
-  - Variables: `VITE_CONVEX_URL`, `VITE_CONVEX_SITE_URL` (production deployment URLs)
-  - On the production Convex deployment, set `BETTER_AUTH_SECRET` and `SITE_URL=https://ofry.ro` once.
+- `.github/workflows/deploy.yml` deploys Convex and then the web app to Cloudflare on every push to `main`. It skips itself until the keys are configured: see **[docs/DEPLOY.md](docs/DEPLOY.md)** for exactly where to get each value and where to put it.
