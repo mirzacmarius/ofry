@@ -16,6 +16,8 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as lib_cards from "../lib/cards.js";
 import type * as lib_constants from "../lib/constants.js";
+import type * as lib_placeholder from "../lib/placeholder.js";
+import type * as lib_seedData from "../lib/seedData.js";
 import type * as lib_session from "../lib/session.js";
 import type * as listings from "../listings.js";
 import type * as messages from "../messages.js";
@@ -37,6 +39,8 @@ import type * as seed from "../seed.js";
 "http": typeof http,
 "lib/cards": typeof lib_cards,
 "lib/constants": typeof lib_constants,
+"lib/placeholder": typeof lib_placeholder,
+"lib/seedData": typeof lib_seedData,
 "lib/session": typeof lib_session,
 "listings": typeof listings,
 "messages": typeof messages,
