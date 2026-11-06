@@ -404,8 +404,15 @@ function ListingPage() {
             )}
           </div>
 
+          {listing.isOwner && listing.favoriteCount !== undefined && listing.favoriteCount > 0 && (
+            <Alert tone="success" title={listing.favoriteCount === 1 ? "O persoană a salvat anunțul" : `${listing.favoriteCount} persoane au salvat anunțul`}>
+              Dacă reduci prețul, le anunțăm imediat.
+            </Alert>
+          )}
+
           <SellerCard
             name={listing.sellerName}
+            avatar={listing.sellerAvatarUrl}
             memberSince={listing.sellerSince ? monthYear(listing.sellerSince) : "—"}
             activeListings={listing.sellerListingCount}
             badges={listing.phone ? <TrustBadge icon={<Phone />}>Telefon în anunț</TrustBadge> : undefined}

@@ -3,10 +3,11 @@ import { ConvexError, v } from "convex/values";
 
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { mutation, query, type QueryCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type QueryCtx } from "./_generated/server";
 import { toCard } from "./lib/cards";
-import { formatLei, getCategory, getSubcategory, MAX_IMAGES } from "./lib/constants";
+import { DAY_MS, formatLei, getCategory, getSubcategory, LISTING_DAYS, MAX_IMAGES, RENEW_WINDOW_DAYS } from "./lib/constants";
 import { notify } from "./lib/notify";
+import { publicProfile } from "./lib/profile";
 import { getUser, requireUser } from "./lib/session";
 import { listingFields, listingStatus } from "./schema";
 
@@ -182,6 +183,10 @@ export const get = query({
     const sellerListingCount = sellerListings.filter((l) => l.status === "active").length;
     const sellerSince = Math.min(...sellerListings.map((l) => l._creationTime));
     const priceStats = listing.price > 0 ? await similarPriceRange(ctx, listing) : null;
+    const favoriteCount = isOwner
+      ? (await ctx.db.query("favorites").withIndex("by_listing", (i) => i.eq("listingId", id)).collect()).length
+      : undefined;
+    const seller = await publicProfile(ctx, listing.sellerId);
 
     const { searchText: _searchText, ...rest } = listing;
     return {
@@ -194,6 +199,8 @@ export const get = query({
       sellerListingCount,
       sellerSince,
       priceStats,
+      favoriteCount,
+      sellerAvatarUrl: seller.avatarUrl,
     };
   },
 });
@@ -208,7 +215,14 @@ export const mine = query({
       .withIndex("by_seller", (i) => i.eq("sellerId", user.id))
       .order("desc")
       .collect();
-    return await Promise.all(listings.map((l) => toCard(ctx, l)));
+    return await Promise.all(
+      listings.map(async (l) => ({
+        ...(await toCard(ctx, l)),
+        expiresAt: l.expiresAt,
+        expiredAt: l.expiredAt,
+        favoriteCount: (await ctx.db.query("favorites").withIndex("by_listing", (i) => i.eq("listingId", l._id)).collect()).length,
+      })),
+    );
   },
 });
 
@@ -222,6 +236,7 @@ export const bySeller = query({
       .take(100);
     const active = listings.filter((l) => l.status === "active");
     return {
+      ...(await publicProfile(ctx, args.sellerId)),
       sellerName: listings[0]?.sellerName ?? null,
       sellerSince: listings.length ? Math.min(...listings.map((l) => l._creationTime)) : null,
       soldCount: listings.filter((l) => l.status === "sold").length,
@@ -282,6 +297,7 @@ export const create = mutation({
       status: "active",
       views: 0,
       searchText: buildSearchText(args),
+      expiresAt: Date.now() + LISTING_DAYS * DAY_MS,
     });
     await ctx.scheduler.runAfter(0, internal.savedSearches.onListingCreated, { listingId: id });
     return id;
@@ -347,8 +363,60 @@ export const update = mutation({
 export const setStatus = mutation({
   args: { id: v.id("listings"), status: listingStatus },
   handler: async (ctx, args) => {
-    await getOwned(ctx, args.id);
-    await ctx.db.patch(args.id, { status: args.status });
+    const listing = await getOwned(ctx, args.id);
+    const now = Date.now();
+    // Turning an expired listing back on starts a new period.
+    const restart = args.status === "active" && listing.expiresAt !== undefined && listing.expiresAt < now;
+    await ctx.db.patch(args.id, {
+      status: args.status,
+      ...(restart ? { expiresAt: now + LISTING_DAYS * DAY_MS, expiryNotified: false } : {}),
+      ...(args.status === "active" ? { expiredAt: undefined } : {}),
+    });
+  },
+});
+
+/** Free renew: another full period, offered close to expiry or after it. */
+export const renew = mutation({
+  args: { id: v.id("listings") },
+  handler: async (ctx, args) => {
+    const listing = await getOwned(ctx, args.id);
+    const now = Date.now();
+    if (listing.status === "sold") throw new ConvexError("Anunțul este marcat ca vândut.");
+    const expired = listing.expiredAt !== undefined;
+    const closeToExpiry = listing.expiresAt !== undefined && listing.expiresAt - now <= RENEW_WINDOW_DAYS * DAY_MS;
+    if (!expired && !closeToExpiry) {
+      throw new ConvexError(`Poți reînnoi anunțul cu ${RENEW_WINDOW_DAYS} zile înainte să expire.`);
+    }
+    await ctx.db.patch(args.id, { status: "active", expiresAt: now + LISTING_DAYS * DAY_MS, expiryNotified: false, expiredAt: undefined });
+  },
+});
+
+/** Hourly (crons.ts): warn sellers 3 days ahead, then switch off expired listings. */
+export const expire = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const soon = await ctx.db
+      .query("listings")
+      .withIndex("by_status_expires", (i) => i.eq("status", "active").gte("expiresAt", now).lt("expiresAt", now + 3 * DAY_MS))
+      .take(500);
+    for (const l of soon) {
+      if (l.expiryNotified) continue;
+      await ctx.db.patch(l._id, { expiryNotified: true });
+      const days = Math.max(1, Math.round((l.expiresAt! - now) / DAY_MS));
+      await notify(ctx, {
+        userId: l.sellerId,
+        kind: "expiring",
+        title: "Anunțul expiră",
+        body: `${l.title} expiră ${days === 1 ? "mâine" : `în ${days} zile`}. Îl poți reînnoi gratuit.`,
+        listingId: l._id,
+      });
+    }
+    const expired = await ctx.db
+      .query("listings")
+      .withIndex("by_status_expires", (i) => i.eq("status", "active").gte("expiresAt", 0).lt("expiresAt", now))
+      .take(500);
+    for (const l of expired) await ctx.db.patch(l._id, { status: "inactive", expiredAt: now });
   },
 });
 
@@ -367,6 +435,11 @@ export const remove = mutation({
       .withIndex("by_listing", (i) => i.eq("listingId", args.id))
       .collect();
     for (const r of reports) await ctx.db.delete(r._id);
+    const views = await ctx.db
+      .query("dailyViews")
+      .withIndex("by_listing_day", (i) => i.eq("listingId", args.id))
+      .collect();
+    for (const d of views) await ctx.db.delete(d._id);
     // Conversations are kept so both sides keep their message history.
     await ctx.db.delete(args.id);
   },
@@ -380,5 +453,12 @@ export const recordView = mutation({
     const user = await getUser(ctx);
     if (user?.id === listing.sellerId) return;
     await ctx.db.patch(args.id, { views: listing.views + 1 });
+    const day = Math.floor(Date.now() / DAY_MS);
+    const today = await ctx.db
+      .query("dailyViews")
+      .withIndex("by_listing_day", (i) => i.eq("listingId", args.id).eq("day", day))
+      .unique();
+    if (today) await ctx.db.patch(today._id, { views: today.views + 1 });
+    else await ctx.db.insert("dailyViews", { listingId: args.id, sellerId: listing.sellerId, day, views: 1 });
   },
 });

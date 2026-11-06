@@ -169,3 +169,9 @@ export const REPORT_REASONS = [
 ] as const;
 
 export type ReportReason = (typeof REPORT_REASONS)[number]["value"];
+
+/** How long a listing stays up before it needs renewing. */
+export const LISTING_DAYS = 30;
+/** Renewing is offered this many days before expiry. */
+export const RENEW_WINDOW_DAYS = 7;
+export const DAY_MS = 86_400_000;

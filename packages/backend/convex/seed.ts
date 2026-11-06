@@ -196,6 +196,11 @@ export const deleteBatch = internalMutation({
         .withIndex("by_listing", (i) => i.eq("listingId", listing._id))
         .collect();
       for (const r of reports) await ctx.db.delete(r._id);
+      const views = await ctx.db
+        .query("dailyViews")
+        .withIndex("by_listing_day", (i) => i.eq("listingId", listing._id))
+        .collect();
+      for (const d of views) await ctx.db.delete(d._id);
 
       const conversations = await ctx.db
         .query("conversations")

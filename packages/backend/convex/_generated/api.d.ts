@@ -9,7 +9,9 @@
    */
   
   import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server";
-  import type * as auth from "../auth.js";
+  import type * as account from "../account.js";
+import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as favorites from "../favorites.js";
 import type * as files from "../files.js";
 import type * as healthCheck from "../healthCheck.js";
@@ -18,6 +20,7 @@ import type * as lib_cards from "../lib/cards.js";
 import type * as lib_constants from "../lib/constants.js";
 import type * as lib_notify from "../lib/notify.js";
 import type * as lib_placeholder from "../lib/placeholder.js";
+import type * as lib_profile from "../lib/profile.js";
 import type * as lib_searchMatch from "../lib/searchMatch.js";
 import type * as lib_seedData from "../lib/seedData.js";
 import type * as lib_session from "../lib/session.js";
@@ -37,7 +40,9 @@ import type * as seed from "../seed.js";
    * ```
    */
   declare const fullApi: ApiFromModules<{
-    "auth": typeof auth,
+    "account": typeof account,
+"auth": typeof auth,
+"crons": typeof crons,
 "favorites": typeof favorites,
 "files": typeof files,
 "healthCheck": typeof healthCheck,
@@ -46,6 +51,7 @@ import type * as seed from "../seed.js";
 "lib/constants": typeof lib_constants,
 "lib/notify": typeof lib_notify,
 "lib/placeholder": typeof lib_placeholder,
+"lib/profile": typeof lib_profile,
 "lib/searchMatch": typeof lib_searchMatch,
 "lib/seedData": typeof lib_seedData,
 "lib/session": typeof lib_session,

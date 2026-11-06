@@ -3,7 +3,7 @@ import { SafetyTip } from "@ofry/ui/components/ofry-feedback";
 import { SellerCard } from "@ofry/ui/components/ofry-market";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { Search, Store } from "lucide-react";
+import { MapPin, Search, Store } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { ListingGrid, ListingGridSkeleton } from "@/components/listing-card";
@@ -26,10 +26,22 @@ function SellerPage() {
           ) : (
             <SellerCard
               name={data.sellerName ?? "Vânzător"}
+              avatar={data.avatarUrl}
               memberSince={data.sellerSince ? monthYear(data.sellerSince) : "—"}
               activeListings={data.listings.length}
               sold={data.soldCount}
             />
+          )}
+          {data && (data.bio || data.city) && (
+            <div className="panel space-y-2 p-5 text-sm">
+              {data.city && (
+                <p className="flex items-center gap-1.5 font-medium">
+                  <MapPin className="size-4 text-muted-foreground" /> {data.city}
+                  {data.county ? `, ${data.county}` : ""}
+                </p>
+              )}
+              {data.bio && <p className="whitespace-pre-line text-foreground/80">{data.bio}</p>}
+            </div>
           )}
           <SafetyTip tips={["Nu plăti în avans.", "Vezi produsul înainte să plătești.", "Vorbește prin mesajele Ofry."]} className="hidden lg:block" />
         </aside>

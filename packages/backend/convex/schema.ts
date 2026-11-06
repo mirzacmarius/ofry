@@ -65,16 +65,43 @@ export default defineSchema({
     /** Price before the latest reduction, shown crossed out. Cleared when the price goes back up. */
     previousPrice: v.optional(v.number()),
     priceDroppedAt: v.optional(v.number()),
+    /** Active listings are hidden after this time unless renewed. Missing means never. */
+    expiresAt: v.optional(v.number()),
+    /** Set once the "expires soon" notification went out for the current period. */
+    expiryNotified: v.optional(v.boolean()),
+    /** Set when the listing was switched off because it expired. */
+    expiredAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
     .index("by_status_category", ["status", "category"])
     .index("by_status_price", ["status", "price"])
     .index("by_status_category_price", ["status", "category", "price"])
     .index("by_seller", ["sellerId"])
+    .index("by_status_expires", ["status", "expiresAt"])
     .searchIndex("search_text", {
       searchField: "searchText",
       filterFields: ["status", "category", "county"],
     }),
+
+  /** Public seller profile, next to the Better Auth user (which holds name and email). */
+  profiles: defineTable({
+    userId: v.string(),
+    phone: v.optional(v.string()),
+    county: v.optional(v.string()),
+    city: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    avatarId: v.optional(v.id("_storage")),
+  }).index("by_user", ["userId"]),
+
+  /** Views per listing per day (day = days since 1970, UTC), for the seller charts. */
+  dailyViews: defineTable({
+    listingId: v.id("listings"),
+    sellerId: v.string(),
+    day: v.number(),
+    views: v.number(),
+  })
+    .index("by_listing_day", ["listingId", "day"])
+    .index("by_seller_day", ["sellerId", "day"]),
 
   favorites: defineTable({
     userId: v.string(),
