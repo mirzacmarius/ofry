@@ -191,6 +191,11 @@ export const deleteBatch = internalMutation({
         .withIndex("by_listing", (i) => i.eq("listingId", listing._id))
         .collect();
       for (const f of favorites) await ctx.db.delete(f._id);
+      const reports = await ctx.db
+        .query("reports")
+        .withIndex("by_listing", (i) => i.eq("listingId", listing._id))
+        .collect();
+      for (const r of reports) await ctx.db.delete(r._id);
 
       const conversations = await ctx.db
         .query("conversations")
@@ -201,7 +206,10 @@ export const deleteBatch = internalMutation({
           .query("messages")
           .withIndex("by_conversation", (i) => i.eq("conversationId", c._id))
           .collect();
-        for (const m of messages) await ctx.db.delete(m._id);
+        for (const m of messages) {
+          if (m.imageId) await ctx.storage.delete(m.imageId);
+          await ctx.db.delete(m._id);
+        }
         await ctx.db.delete(c._id);
       }
       await ctx.db.delete(listing._id);

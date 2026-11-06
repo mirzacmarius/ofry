@@ -134,6 +134,8 @@ function ChatComposer({
   disabled,
   maxLength,
   extras,
+  onAttach,
+  start,
   className,
 }: {
   placeholder?: string;
@@ -142,8 +144,12 @@ function ChatComposer({
   onSubmit?: () => void;
   disabled?: boolean;
   maxLength?: number;
-  /** Show the attach and emoji buttons (only when they do something). */
+  /** Show the attach and emoji buttons as a static preview (design catalog). */
   extras?: boolean;
+  /** Shows a working attach button. */
+  onAttach?: () => void;
+  /** Buttons before the input, e.g. "make an offer". */
+  start?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -154,11 +160,12 @@ function ChatComposer({
         onSubmit?.();
       }}
     >
-      {extras && (
-        <button type="button" aria-label="Atașează" className="btn btn-ghost btn-icon shrink-0 rounded-full">
+      {(extras || onAttach) && (
+        <button type="button" aria-label="Trimite o fotografie" onClick={onAttach} className="btn btn-ghost btn-icon shrink-0 rounded-full">
           <Paperclip />
         </button>
       )}
+      {start}
       <div className="flex h-11 min-w-0 flex-1 items-center rounded-full bg-surface pr-1 pl-4 transition focus-within:bg-background focus-within:ring-3 focus-within:ring-ring/25">
         <input
           placeholder={placeholder}

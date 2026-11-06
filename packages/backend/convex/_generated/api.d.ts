@@ -21,6 +21,7 @@ import type * as lib_seedData from "../lib/seedData.js";
 import type * as lib_session from "../lib/session.js";
 import type * as listings from "../listings.js";
 import type * as messages from "../messages.js";
+import type * as reports from "../reports.js";
 import type * as seed from "../seed.js";
 
   /**
@@ -44,6 +45,7 @@ import type * as seed from "../seed.js";
 "lib/session": typeof lib_session,
 "listings": typeof listings,
 "messages": typeof messages,
+"reports": typeof reports,
 "seed": typeof seed,
   }>;
   export declare const api: FilterApi<typeof fullApi, FunctionReference<any, "public">>;

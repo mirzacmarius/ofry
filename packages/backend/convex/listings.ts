@@ -228,6 +228,28 @@ export const bySeller = query({
   },
 });
 
+/** Other active listings from the same subcategory, then the same category. */
+export const similar = query({
+  args: { id: v.id("listings"), limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const listing = await ctx.db.get(args.id);
+    if (!listing) return [];
+    const limit = Math.min(args.limit ?? 8, 24);
+    const candidates = await ctx.db
+      .query("listings")
+      .withIndex("by_status_category", (i) => i.eq("status", "active").eq("category", listing.category))
+      .order("desc")
+      .take(200);
+    const others = candidates.filter((l) => l._id !== listing._id);
+    const sameSub = others.filter((l) => l.subcategory === listing.subcategory);
+    const rest = others.filter((l) => l.subcategory !== listing.subcategory);
+    // Prefer similar prices inside the subcategory.
+    sameSub.sort((a, b) => Math.abs(a.price - listing.price) - Math.abs(b.price - listing.price));
+    const picked = [...sameSub, ...rest].slice(0, limit);
+    return await Promise.all(picked.map((l) => toCard(ctx, l)));
+  },
+});
+
 export const categoryCounts = query({
   args: {},
   handler: async (ctx) => {
@@ -276,6 +298,15 @@ export const update = mutation({
   handler: async (ctx, { id, ...fields }) => {
     const listing = await getOwned(ctx, id);
     validate(fields);
+    const price = Math.round(fields.price);
+    // Remember the old price when it goes down so buyers see the reduction.
+    const reference = listing.previousPrice ?? listing.price;
+    const priceChange =
+      price < listing.price
+        ? { previousPrice: Math.max(reference, listing.price), priceDroppedAt: Date.now() }
+        : price >= reference
+          ? { previousPrice: undefined, priceDroppedAt: undefined }
+          : {};
     // Delete images that were removed from the listing.
     for (const old of listing.images) {
       if (!fields.images.includes(old)) await ctx.storage.delete(old);
@@ -285,7 +316,8 @@ export const update = mutation({
       title: fields.title.trim(),
       description: fields.description.trim(),
       city: fields.city.trim(),
-      price: Math.round(fields.price),
+      price,
+      ...priceChange,
       searchText: buildSearchText(fields),
     });
   },
@@ -309,6 +341,11 @@ export const remove = mutation({
       .withIndex("by_listing", (i) => i.eq("listingId", args.id))
       .collect();
     for (const f of favorites) await ctx.db.delete(f._id);
+    const reports = await ctx.db
+      .query("reports")
+      .withIndex("by_listing", (i) => i.eq("listingId", args.id))
+      .collect();
+    for (const r of reports) await ctx.db.delete(r._id);
     // Conversations are kept so both sides keep their message history.
     await ctx.db.delete(args.id);
   },

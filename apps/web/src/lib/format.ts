@@ -36,6 +36,13 @@ export function errorMessage(error: unknown) {
   return "A apărut o eroare. Încearcă din nou.";
 }
 
+/** Like errorMessage, but keeps the readable errors thrown while uploading a file. */
+export function uploadErrorMessage(error: unknown) {
+  if (error instanceof ConvexError) return String(error.data);
+  if (error instanceof Error && error.message) return error.message;
+  return errorMessage(error);
+}
+
 const DAY = 86_400_000;
 
 function startOfDay(ts: number) {

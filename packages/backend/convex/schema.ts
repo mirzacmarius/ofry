@@ -2,6 +2,16 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export const listingStatus = v.union(v.literal("active"), v.literal("sold"), v.literal("inactive"));
+export const messageKind = v.union(v.literal("text"), v.literal("offer"), v.literal("image"));
+export const offerStatus = v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined"));
+export const reportReason = v.union(
+  v.literal("fraud"),
+  v.literal("sold"),
+  v.literal("duplicate"),
+  v.literal("wrong_category"),
+  v.literal("prohibited"),
+  v.literal("other"),
+);
 export const listingCondition = v.union(v.literal("new"), v.literal("used"));
 
 export const listingFields = {
@@ -35,6 +45,9 @@ export default defineSchema({
     views: v.number(),
     /** Title + description + city, used by the full text search index. */
     searchText: v.string(),
+    /** Price before the latest reduction, shown crossed out. Cleared when the price goes back up. */
+    previousPrice: v.optional(v.number()),
+    priceDroppedAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
     .index("by_status_category", ["status", "category"])
@@ -75,5 +88,21 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     senderId: v.string(),
     body: v.string(),
+    /** Missing means a plain text message. */
+    kind: v.optional(messageKind),
+    /** For kind "offer": the amount in lei and what the seller answered. */
+    offerAmount: v.optional(v.number()),
+    offerStatus: v.optional(offerStatus),
+    /** For kind "image": the uploaded photo. */
+    imageId: v.optional(v.id("_storage")),
   }).index("by_conversation", ["conversationId"]),
+
+  reports: defineTable({
+    listingId: v.id("listings"),
+    reporterId: v.string(),
+    reason: reportReason,
+    details: v.string(),
+  })
+    .index("by_listing", ["listingId"])
+    .index("by_reporter_listing", ["reporterId", "listingId"]),
 });

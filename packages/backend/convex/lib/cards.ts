@@ -9,6 +9,7 @@ export async function toCard(ctx: QueryCtx, listing: Doc<"listings">) {
     _creationTime: listing._creationTime,
     title: listing.title,
     price: listing.price,
+    previousPrice: listing.previousPrice,
     negotiable: listing.negotiable,
     category: listing.category,
     subcategory: listing.subcategory,

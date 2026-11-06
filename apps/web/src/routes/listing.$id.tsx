@@ -1,6 +1,6 @@
 import { api } from "@ofry/backend/convex/_generated/api";
 import type { Id } from "@ofry/backend/convex/_generated/dataModel";
-import { ImageDots } from "@ofry/ui/components/ofry";
+import { ImageDots, SectionHeader } from "@ofry/ui/components/ofry";
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
@@ -14,7 +14,9 @@ import {
   ChevronRight,
   Cog,
   Eye,
+  Flag,
   Fuel,
+  HandCoins,
   Gauge,
   ImageOff,
   MapPin,
@@ -31,7 +33,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { FavoriteButton } from "@/components/favorite-button";
+import { ListingGrid } from "@/components/listing-card";
 import Loader from "@/components/loader";
+import { OfferDialog } from "@/components/offer-dialog";
+import { ReportDialog } from "@/components/report-dialog";
 import { categoryName, errorMessage, formatNumber, monthYear, subcategoryName, timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/listing/$id")({
@@ -131,12 +136,22 @@ async function share(title: string) {
   }
 }
 
-function ContactBox({ listingId, sellerName }: { listingId: Id<"listings">; sellerName: string }) {
+function ContactBox({
+  listingId,
+  sellerName,
+  offerPrice,
+}: {
+  listingId: Id<"listings">;
+  sellerName: string;
+  /** Set when the seller accepts offers. */
+  offerPrice?: number;
+}) {
   const { isAuthenticated } = useConvexAuth();
   const navigate = useNavigate();
   const contact = useMutation(api.messages.contactSeller);
   const [body, setBody] = useState("Bună ziua! Mai este disponibil?");
   const [sending, setSending] = useState(false);
+  const [offering, setOffering] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -146,7 +161,24 @@ function ContactBox({ listingId, sellerName }: { listingId: Id<"listings">; sell
     );
   }
 
+  const offer = offerPrice !== undefined && (
+    <>
+      <button type="button" className="btn btn-brand-outline w-full" onClick={() => setOffering(true)}>
+        <HandCoins /> Fă o ofertă
+      </button>
+      <OfferDialog
+        open={offering}
+        onClose={() => setOffering(false)}
+        listingId={listingId}
+        price={offerPrice}
+        onSent={(conversationId) => navigate({ to: "/messages/$conversationId", params: { conversationId } })}
+      />
+    </>
+  );
+
+  // The offer dialog stays outside the form: React events bubble through portals.
   return (
+    <>
     <form
       id="contact"
       className="scroll-mt-24 space-y-2"
@@ -172,6 +204,42 @@ function ContactBox({ listingId, sellerName }: { listingId: Id<"listings">; sell
         <Send /> Trimite mesaj
       </button>
     </form>
+    {offer && <div className="mt-2">{offer}</div>}
+    </>
+  );
+}
+
+function ReportButton({ listingId }: { listingId: Id<"listings"> }) {
+  const { isAuthenticated } = useConvexAuth();
+  const already = useQuery(api.reports.mine, isAuthenticated ? { listingId } : "skip");
+  const [open, setOpen] = useState(false);
+  const className = "inline-flex items-center gap-1 font-medium hover:text-foreground hover:underline";
+  if (!isAuthenticated) {
+    return (
+      <Link to="/login" search={{ redirect: location.pathname }} className={className}>
+        <Flag className="size-3.5" /> Raportează anunțul
+      </Link>
+    );
+  }
+  if (already) return <span className="inline-flex items-center gap-1"><Flag className="size-3.5" /> Ai raportat acest anunț</span>;
+  return (
+    <>
+      <button type="button" className={className} onClick={() => setOpen(true)}>
+        <Flag className="size-3.5" /> Raportează anunțul
+      </button>
+      <ReportDialog open={open} onClose={() => setOpen(false)} listingId={listingId} />
+    </>
+  );
+}
+
+function SimilarListings({ listingId }: { listingId: Id<"listings"> }) {
+  const similar = useQuery(api.listings.similar, { id: listingId, limit: 8 });
+  if (!similar?.length) return null;
+  return (
+    <section className="mt-12">
+      <SectionHeader title="Anunțuri similare" />
+      <ListingGrid listings={similar} />
+    </section>
   );
 }
 
@@ -273,7 +341,7 @@ function ListingPage() {
               {listing.condition && <span className="badge">{listing.condition === "new" ? "Nou" : "Folosit"}</span>}
               {listing.price === 0 && <span className="badge badge-highlight">Gratuit</span>}
             </div>
-            <PriceTag price={listing.price} negotiable={listing.negotiable} size="lg" className="mt-4 lg:hidden" />
+            <PriceTag price={listing.price} oldPrice={listing.previousPrice} negotiable={listing.negotiable} size="lg" className="mt-4 lg:hidden" />
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <MapPin className="size-4" /> {listing.city}, {listing.county}
@@ -310,12 +378,15 @@ function ListingPage() {
             <MapPreview place={`${listing.city}, ${listing.county}`} detail="Locul exact îl stabilești cu vânzătorul" className="max-w-lg" />
           </section>
 
-          <p className="text-xs text-muted-foreground">ID anunț: {listing._id}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>ID anunț: {listing._id}</span>
+            {!listing.isOwner && <ReportButton listingId={listing._id} />}
+          </div>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="panel hidden space-y-5 p-6 lg:block">
-            <PriceTag price={listing.price} negotiable={listing.negotiable} size="lg" />
+            <PriceTag price={listing.price} oldPrice={listing.previousPrice} negotiable={listing.negotiable} size="lg" />
             <div className="flex gap-2">
               {listing.isOwner ? (
                 <Link to="/edit/$id" params={{ id: listing._id }} className="btn btn-primary flex-1">
@@ -347,7 +418,11 @@ function ListingPage() {
 
           {canContact && (
             <div className="panel p-5">
-              <ContactBox listingId={listing._id} sellerName={listing.sellerName} />
+              <ContactBox
+                listingId={listing._id}
+                sellerName={listing.sellerName}
+                offerPrice={listing.negotiable && listing.price > 0 ? listing.price : undefined}
+              />
             </div>
           )}
 
@@ -360,6 +435,8 @@ function ListingPage() {
           />
         </aside>
       </div>
+
+      <SimilarListings listingId={listing._id} />
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-md gap-2">
