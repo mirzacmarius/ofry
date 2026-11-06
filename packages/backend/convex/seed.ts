@@ -211,6 +211,11 @@ export const deleteBatch = internalMutation({
           .query("messages")
           .withIndex("by_conversation", (i) => i.eq("conversationId", c._id))
           .collect();
+        const reviews = await ctx.db
+          .query("reviews")
+          .withIndex("by_conversation", (i) => i.eq("conversationId", c._id))
+          .collect();
+        for (const r of reviews) await ctx.db.delete(r._id);
         for (const m of messages) {
           if (m.imageId) await ctx.storage.delete(m.imageId);
           await ctx.db.delete(m._id);

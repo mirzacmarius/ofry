@@ -5,12 +5,13 @@ import { Avatar } from "@ofry/ui/components/ofry-market";
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowLeft, HandCoins, ImageOff, Loader2 } from "lucide-react";
+import { ArrowLeft, HandCoins, ImageOff, Loader2, Star } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import Loader from "@/components/loader";
 import { OfferDialog } from "@/components/offer-dialog";
+import { ReviewDialog } from "@/components/review-dialog";
 import { clockTime, dayLabel, errorMessage, formatPrice, uploadErrorMessage } from "@/lib/format";
 import { uploadImage } from "@/lib/upload";
 
@@ -26,6 +27,8 @@ const REPLIES = {
 function ConversationPage() {
   const { conversationId } = Route.useParams();
   const thread = useQuery(api.messages.thread, { conversationId });
+  const review = useQuery(api.reviews.forConversation, thread ? { conversationId: thread._id } : "skip");
+  const [reviewing, setReviewing] = useState(false);
   const send = useMutation(api.messages.send);
   const sendImage = useMutation(api.messages.sendImage);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
@@ -103,7 +106,18 @@ function ConversationPage() {
           <div className="truncate font-semibold">{thread.otherName}</div>
           <div className="truncate text-xs text-muted-foreground">{thread.role === "seller" ? "Cumpărător interesat" : "Vânzător"}</div>
         </div>
+        {review?.canReview && (
+          <button type="button" className="chip chip-sm shrink-0" onClick={() => setReviewing(true)}>
+            <Star className="text-rating" /> Evaluează
+          </button>
+        )}
+        {review?.review && (
+          <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground" title="Recenzia ta">
+            <Star className="size-3.5 fill-rating text-rating" /> {review.review.rating}/5
+          </span>
+        )}
       </div>
+      {review?.canReview && <ReviewDialog open={reviewing} onClose={() => setReviewing(false)} conversationId={thread._id} sellerName={thread.otherName} />}
 
       <Link
         to="/listing/$id"

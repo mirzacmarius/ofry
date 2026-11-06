@@ -119,8 +119,9 @@ export const sendImage = mutation({
     const user = await requireUser(ctx);
     const c = await ownConversation(ctx, args.conversationId, user);
     const file = await ctx.db.system.get("_storage", args.storageId);
-    if (!file || !file.contentType?.startsWith("image/") || file.size > MAX_IMAGE_BYTES) {
-      if (file) await ctx.storage.delete(args.storageId);
+    if (!file || file._creationTime < Date.now() - 60 * 60 * 1000) throw new ConvexError("Încarcă fotografia din nou.");
+    if (!file.contentType?.startsWith("image/") || file.size > MAX_IMAGE_BYTES) {
+      await ctx.storage.delete(args.storageId);
       throw new ConvexError("Poți trimite doar imagini de cel mult 8 MB.");
     }
     const body = (args.body ?? "").trim().slice(0, 2000);

@@ -38,7 +38,7 @@ import Loader from "@/components/loader";
 import { OfferDialog } from "@/components/offer-dialog";
 import { ReportDialog } from "@/components/report-dialog";
 import { rememberListing } from "@/lib/local-history";
-import { categoryName, errorMessage, formatNumber, monthYear, subcategoryName, timeAgo } from "@/lib/format";
+import { categoryName, errorMessage, formatNumber, formatPrice, monthYear, subcategoryName, timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/listing/$id")({
   component: ListingPage,
@@ -255,6 +255,14 @@ function ListingPage() {
     if (listingId) recordView({ id: listingId }).catch(() => {});
   }, [listingId, recordView]);
   useEffect(() => {
+    if (!listing) return;
+    const previous = document.title;
+    document.title = `${listing.title} · ${formatPrice(listing.price)} · Ofry.ro`;
+    return () => {
+      document.title = previous;
+    };
+  }, [listing?.title, listing?.price]);
+  useEffect(() => {
     if (!listing || listing.isOwner || listing.status !== "active") return;
     const { _id, _creationTime, title, price, previousPrice, negotiable, category, subcategory, county, city, status, views, year, mileage, rooms, area } = listing;
     rememberListing({ _id, _creationTime, title, price, previousPrice, negotiable, category, subcategory, county, city, status, views, year, mileage, rooms, area, imageUrl: listing.images[0]?.url ?? null });
@@ -419,6 +427,8 @@ function ListingPage() {
           <SellerCard
             name={listing.sellerName}
             avatar={listing.sellerAvatarUrl}
+            rating={listing.sellerRating.rating}
+            reviews={listing.sellerRating.reviews || undefined}
             memberSince={listing.sellerSince ? monthYear(listing.sellerSince) : "—"}
             activeListings={listing.sellerListingCount}
             badges={listing.phone ? <TrustBadge icon={<Phone />}>Telefon în anunț</TrustBadge> : undefined}

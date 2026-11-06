@@ -11,6 +11,7 @@
   import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server";
   import type * as account from "../account.js";
 import type * as auth from "../auth.js";
+import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
 import type * as favorites from "../favorites.js";
 import type * as files from "../files.js";
@@ -28,6 +29,7 @@ import type * as listings from "../listings.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
 import type * as reports from "../reports.js";
+import type * as reviews from "../reviews.js";
 import type * as savedSearches from "../savedSearches.js";
 import type * as seed from "../seed.js";
 
@@ -42,6 +44,7 @@ import type * as seed from "../seed.js";
   declare const fullApi: ApiFromModules<{
     "account": typeof account,
 "auth": typeof auth,
+"contact": typeof contact,
 "crons": typeof crons,
 "favorites": typeof favorites,
 "files": typeof files,
@@ -59,6 +62,7 @@ import type * as seed from "../seed.js";
 "messages": typeof messages,
 "notifications": typeof notifications,
 "reports": typeof reports,
+"reviews": typeof reviews,
 "savedSearches": typeof savedSearches,
 "seed": typeof seed,
   }>;

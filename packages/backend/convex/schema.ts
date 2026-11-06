@@ -179,6 +179,29 @@ export default defineSchema({
     .index("by_user_read", ["userId", "read", "at"])
     .index("by_saved_search", ["savedSearchId", "read"]),
 
+  /** A buyer's review of a seller, one per conversation. */
+  reviews: defineTable({
+    sellerId: v.string(),
+    reviewerId: v.string(),
+    reviewerName: v.string(),
+    conversationId: v.id("conversations"),
+    listingTitle: v.string(),
+    rating: v.number(),
+    text: v.string(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_conversation", ["conversationId"])
+    .index("by_reviewer", ["reviewerId"]),
+
+  /** Messages sent through the contact page, read from the Convex dashboard. */
+  contactMessages: defineTable({
+    name: v.string(),
+    email: v.string(),
+    topic: v.string(),
+    body: v.string(),
+    userId: v.optional(v.string()),
+  }),
+
   reports: defineTable({
     listingId: v.id("listings"),
     reporterId: v.string(),

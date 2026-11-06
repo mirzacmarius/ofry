@@ -61,8 +61,10 @@ export const setAvatar = mutation({
     const user = await requireUser(ctx);
     if (args.storageId) {
       const file = await ctx.db.system.get("_storage", args.storageId);
-      if (!file?.contentType?.startsWith("image/") || file.size > 8 * 1024 * 1024) {
-        if (file) await ctx.storage.delete(args.storageId);
+      // Only a file uploaded just now, so nobody can claim (and later delete) someone else's photo.
+      if (!file || file._creationTime < Date.now() - 60 * 60 * 1000) throw new ConvexError("Încarcă poza din nou.");
+      if (!file.contentType?.startsWith("image/") || file.size > 8 * 1024 * 1024) {
+        await ctx.storage.delete(args.storageId);
         throw new ConvexError("Alege o imagine de cel mult 8 MB.");
       }
     }
@@ -183,6 +185,8 @@ export const purgeUserData = internalMutation({
     await deleteAll(ctx, "savedSearches", await ctx.db.query("savedSearches").withIndex("by_user", (i) => i.eq("userId", userId)).collect());
     await deleteAll(ctx, "notifications", await ctx.db.query("notifications").withIndex("by_user", (i) => i.eq("userId", userId)).collect());
     await deleteAll(ctx, "reports", await ctx.db.query("reports").withIndex("by_reporter_listing", (i) => i.eq("reporterId", userId)).collect());
+    await deleteAll(ctx, "reviews", await ctx.db.query("reviews").withIndex("by_seller", (i) => i.eq("sellerId", userId)).collect());
+    await deleteAll(ctx, "reviews", await ctx.db.query("reviews").withIndex("by_reviewer", (i) => i.eq("reviewerId", userId)).collect());
     const profile = await getProfile(ctx, userId);
     if (profile) {
       if (profile.avatarId) await ctx.storage.delete(profile.avatarId);
@@ -192,7 +196,7 @@ export const purgeUserData = internalMutation({
   },
 });
 
-async function deleteAll<T extends "favorites" | "reports" | "dailyViews" | "savedSearches" | "notifications">(
+async function deleteAll<T extends "favorites" | "reports" | "dailyViews" | "savedSearches" | "notifications" | "reviews">(
   ctx: MutationCtx,
   _table: T,
   rows: { _id: Id<T> }[],

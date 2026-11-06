@@ -9,14 +9,28 @@ import { toCard } from "./lib/cards";
 import { DAY_MS, formatLei, getCategory, getSubcategory, LISTING_DAYS, MAX_IMAGES, RENEW_WINDOW_DAYS } from "./lib/constants";
 import { notify } from "./lib/notify";
 import { publicProfile } from "./lib/profile";
+import { ratingSummary } from "./reviews";
 import { getUser, requireUser } from "./lib/session";
 import { listingFields, listingStatus } from "./schema";
+
+const UPLOAD_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
 const sortValidator = v.union(v.literal("newest"), v.literal("price_asc"), v.literal("price_desc"));
 
 
 function buildSearchText(l: { title: string; description: string; city: string }) {
   return `${l.title} ${l.description} ${l.city}`;
+}
+
+/** Rejects photos that were not uploaded just now (e.g. ids taken from other listings). */
+async function checkFreshImages(ctx: QueryCtx, ids: Id<"_storage">[], keep: Id<"_storage">[] = []) {
+  for (const id of ids) {
+    if (keep.includes(id)) continue;
+    const file = await ctx.db.system.get("_storage", id);
+    if (!file || !file.contentType?.startsWith("image/") || file._creationTime < Date.now() - UPLOAD_MAX_AGE_MS) {
+      throw new ConvexError("O poză nu a putut fi folosită. Încarc-o din nou.");
+    }
+  }
 }
 
 function validate(input: {
@@ -246,7 +260,8 @@ export const get = query({
 
     const images = await Promise.all(
       listing.images.map(async (storageId) => ({
-        storageId,
+        // Only the owner needs the ids (to edit); others could misuse them in uploads.
+        storageId: isOwner ? storageId : null,
         url: await ctx.storage.getUrl(storageId),
       })),
     );
@@ -281,6 +296,7 @@ export const get = query({
       priceStats,
       favoriteCount,
       sellerAvatarUrl: seller.avatarUrl,
+      sellerRating: await ratingSummary(ctx, listing.sellerId),
     };
   },
 });
@@ -317,6 +333,7 @@ export const bySeller = query({
     const active = listings.filter((l) => l.status === "active");
     return {
       ...(await publicProfile(ctx, args.sellerId)),
+      ...(await ratingSummary(ctx, args.sellerId)),
       sellerName: listings[0]?.sellerName ?? null,
       sellerSince: listings.length ? Math.min(...listings.map((l) => l._creationTime)) : null,
       soldCount: listings.filter((l) => l.status === "sold").length,
@@ -366,6 +383,7 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     validate(args);
+    await checkFreshImages(ctx, args.images);
     const id = await ctx.db.insert("listings", {
       ...args,
       title: args.title.trim(),
@@ -398,6 +416,7 @@ export const update = mutation({
   handler: async (ctx, { id, ...fields }) => {
     const listing = await getOwned(ctx, id);
     validate(fields);
+    await checkFreshImages(ctx, fields.images, listing.images);
     const price = Math.round(fields.price);
     // Remember the old price when it goes down so buyers see the reduction.
     const reference = listing.previousPrice ?? listing.price;
