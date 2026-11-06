@@ -125,20 +125,62 @@ function QuickReplies({ replies, onPick, className }: { replies: string[]; onPic
   );
 }
 
-/** Message composer: attach, text, emoji, round send button. */
-function ChatComposer({ placeholder = "Scrie un mesaj…", className }: { placeholder?: string; className?: string }) {
+/** Message composer: optional attach and emoji, a pill input and a round send button. */
+function ChatComposer({
+  placeholder = "Scrie un mesaj…",
+  value,
+  onValueChange,
+  onSubmit,
+  disabled,
+  maxLength,
+  extras,
+  className,
+}: {
+  placeholder?: string;
+  value?: string;
+  onValueChange?: (v: string) => void;
+  onSubmit?: () => void;
+  disabled?: boolean;
+  maxLength?: number;
+  /** Show the attach and emoji buttons (only when they do something). */
+  extras?: boolean;
+  className?: string;
+}) {
   return (
-    <form className={cn("flex items-center gap-2", className)} onSubmit={(e) => e.preventDefault()}>
-      <button type="button" aria-label="Atașează" className="btn btn-ghost btn-icon shrink-0 rounded-full">
-        <Paperclip />
-      </button>
-      <div className="flex h-11 min-w-0 flex-1 items-center rounded-full bg-surface pr-1 pl-4">
-        <input placeholder={placeholder} aria-label="Mesaj" className="min-w-0 flex-1 bg-transparent text-[0.9375rem] outline-none placeholder:text-muted-foreground" />
-        <button type="button" aria-label="Emoji" className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:text-foreground">
-          <Smile className="size-5" />
+    <form
+      className={cn("flex items-center gap-2", className)}
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit?.();
+      }}
+    >
+      {extras && (
+        <button type="button" aria-label="Atașează" className="btn btn-ghost btn-icon shrink-0 rounded-full">
+          <Paperclip />
         </button>
+      )}
+      <div className="flex h-11 min-w-0 flex-1 items-center rounded-full bg-surface pr-1 pl-4 transition focus-within:bg-background focus-within:ring-3 focus-within:ring-ring/25">
+        <input
+          placeholder={placeholder}
+          aria-label="Mesaj"
+          value={value}
+          maxLength={maxLength}
+          onChange={onValueChange ? (e) => onValueChange(e.target.value) : undefined}
+          readOnly={value !== undefined && !onValueChange}
+          className="h-full min-w-0 flex-1 bg-transparent text-[0.9375rem] outline-none placeholder:text-muted-foreground"
+        />
+        {extras && (
+          <button type="button" aria-label="Emoji" className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:text-foreground">
+            <Smile className="size-5" />
+          </button>
+        )}
       </div>
-      <button type="submit" aria-label="Trimite" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition active:scale-95">
+      <button
+        type="submit"
+        aria-label="Trimite"
+        disabled={disabled}
+        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition active:scale-95 disabled:opacity-50 disabled:shadow-none"
+      >
         <SendHorizontal className="size-5" />
       </button>
     </form>
@@ -162,7 +204,8 @@ function ConversationRow({
   listing: string;
   last: string;
   time: string;
-  unread?: number;
+  /** A count shows a pill; `true` shows a dot. */
+  unread?: number | boolean;
   online?: boolean;
   thumb?: string | null;
   typing?: boolean;
@@ -185,9 +228,10 @@ function ConversationRow({
           <span className={cn("truncate text-sm", unread ? "text-foreground" : "text-muted-foreground")}>
             {typing ? <span className="font-medium text-brand-ink">scrie…</span> : last}
           </span>
-          {unread > 0 && (
+          {typeof unread === "number" && unread > 0 && (
             <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground">{unread}</span>
           )}
+          {unread === true && <span className="size-2.5 shrink-0 rounded-full bg-primary" aria-label="Necitit" />}
         </div>
       </div>
     </div>

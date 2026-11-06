@@ -1,5 +1,5 @@
 import { cn } from "@ofry/ui/lib/utils";
-import { ArrowUpLeft, Camera, Check, Clock, GripVertical, ImagePlus, Search, Star, TrendingUp, X } from "lucide-react";
+import { ArrowUpLeft, Camera, Check, Clock, ImagePlus, Search, Star, TrendingUp, X } from "lucide-react";
 import type * as React from "react";
 
 /* ------------------------------------------------------------------ */
@@ -7,8 +7,8 @@ import type * as React from "react";
 /* ------------------------------------------------------------------ */
 
 /**
- * Photo grid for the posting flow: the first photo is the cover, others can
- * be dragged, empty slots invite more, and a tip shows how many are left.
+ * Photo grid for the posting flow: the first photo is the cover, any other
+ * can be promoted to cover, empty slots invite more, and a tip shows the count.
  */
 function PhotoUploader({
   photos,
@@ -16,48 +16,68 @@ function PhotoUploader({
   uploading = 0,
   onAdd,
   onRemove,
+  onMakeCover,
+  hint = "Prima poză apare în rezultate. Anunțurile cu 5+ poze primesc de 2× mai multe mesaje.",
   className,
 }: {
-  photos: string[];
+  photos: { id: string; src: string | null }[];
   max?: number;
   uploading?: number;
   onAdd?: () => void;
   onRemove?: (i: number) => void;
+  onMakeCover?: (i: number) => void;
+  hint?: React.ReactNode;
   className?: string;
 }) {
   const empty = Math.max(0, max - photos.length - uploading);
   return (
     <div className={className}>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-        {photos.map((src, i) => (
+        {photos.map((p, i) => (
           <div
-            key={src}
+            key={p.id}
             className={cn("group relative overflow-hidden rounded-2xl bg-surface", i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-square")}
           >
-            <img src={src} alt="" className="size-full object-cover" />
+            {p.src ? (
+              <img src={p.src} alt="" className="size-full object-cover" />
+            ) : (
+              <span className="flex size-full items-center justify-center text-muted-foreground">
+                <Camera className="size-6" />
+              </span>
+            )}
             {i === 0 && (
               <span className="badge badge-highlight absolute bottom-2 left-2">
                 <Star /> Copertă
               </span>
             )}
-            <span className="absolute top-2 left-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 transition group-hover:opacity-100">
-              <GripVertical className="size-4" />
-            </span>
-            <button
-              type="button"
-              aria-label="Șterge poza"
-              onClick={() => onRemove?.(i)}
-              className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-ink/80 text-ink-foreground transition hover:bg-ink"
-            >
-              <X className="size-4" />
-            </button>
+            {i > 0 && onMakeCover && (
+              <button
+                type="button"
+                aria-label="Fă poza copertă"
+                title="Fă poza copertă"
+                onClick={() => onMakeCover(i)}
+                className="absolute top-2 left-2 flex size-7 items-center justify-center rounded-full bg-background/90 text-foreground transition hover:bg-highlight hover:text-highlight-foreground sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+              >
+                <Star className="size-4" />
+              </button>
+            )}
+            {onRemove && (
+              <button
+                type="button"
+                aria-label="Șterge poza"
+                onClick={() => onRemove(i)}
+                className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-ink/80 text-ink-foreground transition hover:bg-ink"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
         ))}
         {Array.from({ length: uploading }, (_, i) => (
-          <div key={`u${i}`} className="relative aspect-square overflow-hidden rounded-2xl bg-surface">
+          <div key={`u${i}`} className="relative aspect-square overflow-hidden rounded-2xl bg-surface" aria-label="Se încarcă">
             <div className="absolute inset-0 animate-pulse bg-linear-to-br from-brand-soft to-surface" />
             <div className="absolute inset-x-3 bottom-3 h-1.5 overflow-hidden rounded-full bg-background/70">
-              <div className="h-full w-2/3 rounded-full bg-primary" />
+              <div className="h-full w-2/3 animate-pulse rounded-full bg-primary" />
             </div>
           </div>
         ))}
@@ -65,20 +85,23 @@ function PhotoUploader({
           <button
             type="button"
             onClick={onAdd}
-            className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-primary/40 bg-brand-soft/50 text-brand-ink transition hover:border-primary hover:bg-brand-soft"
+            className={cn(
+              "flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-primary/40 bg-brand-soft/50 text-brand-ink transition hover:border-primary hover:bg-brand-soft",
+              photos.length === 0 && uploading === 0 ? "col-span-full h-44 gap-2" : "aspect-square",
+            )}
           >
-            <ImagePlus className="size-6" />
-            <span className="text-xs font-semibold">Adaugă poze</span>
+            <ImagePlus className={photos.length === 0 && uploading === 0 ? "size-8" : "size-6"} />
+            <span className="text-xs font-semibold">{photos.length === 0 && uploading === 0 ? "Adaugă poze · până la " + max : "Adaugă poze"}</span>
           </button>
         )}
-        {Array.from({ length: Math.max(0, empty - 1) }, (_, i) => (
+        {Array.from({ length: photos.length === 0 && uploading === 0 ? 0 : Math.max(0, Math.min(empty - 1, 3)) }, (_, i) => (
           <div key={`e${i}`} className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-border text-muted-foreground/40">
             <Camera className="size-5" />
           </div>
         ))}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {photos.length}/{max} poze · Prima poză apare în rezultate. Anunțurile cu 5+ poze primesc de 2× mai multe mesaje.
+        {photos.length}/{max} poze · {hint}
       </p>
     </div>
   );

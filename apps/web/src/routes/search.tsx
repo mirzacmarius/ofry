@@ -1,5 +1,6 @@
 import { api } from "@ofry/backend/convex/_generated/api";
 import { CATEGORIES, COUNTIES, getCategory } from "@ofry/backend/convex/lib/constants";
+import { AffixField, Segmented, Switch } from "@ofry/ui/components/ofry-forms";
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
@@ -115,39 +116,37 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
           });
         }}
       >
-        <h3 className="mb-2 text-sm font-semibold">Preț (lei)</h3>
-        <div className="flex items-center gap-2">
-          <input className="field" inputMode="numeric" placeholder="De la" aria-label="Preț minim" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
-          <span className="text-muted-foreground">–</span>
-          <input className="field" inputMode="numeric" placeholder="Până la" aria-label="Preț maxim" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
+        <h3 className="mb-2 text-sm font-semibold">Preț</h3>
+        <div className="grid gap-2">
+          <AffixField end="lei" inputMode="numeric" placeholder="De la" aria-label="Preț minim" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} />
+          <AffixField end="lei" inputMode="numeric" placeholder="Până la" aria-label="Preț maxim" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
         </div>
         <button type="submit" className="btn btn-secondary btn-sm mt-2 w-full">
           Aplică prețul
         </button>
+        <Switch
+          className="mt-4"
+          label="Doar gratuite"
+          description="Lucruri pe care oamenii le dau"
+          checked={params.maxPrice === 0}
+          onCheckedChange={(on) => update({ minPrice: undefined, maxPrice: on ? 0 : undefined })}
+        />
       </form>
 
       {!(category && ["imobiliare", "locuri-de-munca", "servicii", "animale"].includes(category.slug)) && (
         <div>
           <h3 className="mb-2 text-sm font-semibold">Stare</h3>
-          <div className="flex gap-2">
-            {(
-              [
-                [undefined, "Toate"],
-                ["new", "Nou"],
-                ["used", "Folosit"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => update({ condition: value })}
-                aria-pressed={params.condition === value}
-                className="chip chip-sm flex-1 justify-center"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <Segmented<"all" | "new" | "used">
+            options={[
+              { value: "all", label: "Toate" },
+              { value: "new", label: "Nou" },
+              { value: "used", label: "Folosit" },
+            ]}
+            value={params.condition ?? "all"}
+            onValueChange={(c) => update({ condition: c === "all" ? undefined : c })}
+            size="sm"
+            className="w-full"
+          />
         </div>
       )}
     </div>
@@ -269,7 +268,17 @@ function SearchPage() {
           {status === "LoadingFirstPage" ? (
             <ListingGridSkeleton />
           ) : results.length === 0 ? (
-            <EmptyState icon={<SearchX />} title="Niciun anunț găsit">
+            <EmptyState
+              icon={<SearchX />}
+              title="Niciun anunț găsit"
+              action={
+                chips.length > 0 ? (
+                  <Link to="/search" search={{}} onClick={() => setQ("")} className="btn btn-primary">
+                    Șterge filtrele
+                  </Link>
+                ) : undefined
+              }
+            >
               Încearcă alte cuvinte sau scoate câteva filtre.
             </EmptyState>
           ) : (

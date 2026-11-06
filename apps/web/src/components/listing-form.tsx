@@ -8,12 +8,15 @@ import {
   MAX_IMAGES,
   getCategory,
 } from "@ofry/backend/convex/lib/constants";
-import { cn } from "@ofry/ui/lib/utils";
+import { ProgressBar } from "@ofry/ui/components/ofry-feedback";
+import { ChoiceTile, PhotoUploader } from "@ofry/ui/components/ofry-flows";
+import { AffixField, RadioCards, Switch } from "@ofry/ui/components/ofry-forms";
 import { useMutation } from "convex/react";
-import { ImagePlus, Loader2, Star, X } from "lucide-react";
+import { Gift, Loader2, PackageCheck, Phone, Recycle } from "lucide-react";
 import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { CategoryIcon, categoryShortName, categoryTintName } from "@/components/category-icon";
 import { errorMessage } from "@/lib/format";
 
 export type UploadedImage = { storageId: Id<"_storage">; url: string | null };
@@ -90,13 +93,31 @@ export function toListingArgs(v: ListingFormValues) {
   };
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="panel space-y-4 p-5">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <section className="panel space-y-4 p-5 sm:p-6">
+      <div>
+        <h2 className="text-lg font-semibold">{title}</h2>
+        {hint && <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>}
+      </div>
       {children}
     </section>
   );
+}
+
+/** What's still missing, in the order a seller would fix it. */
+function completeness(v: ListingFormValues) {
+  const steps: [boolean, string][] = [
+    [v.title.trim().length >= 3, "Scrie un titlu"],
+    [!!v.category && !!v.subcategory, "Alege categoria"],
+    [v.images.length > 0, "Adaugă o poză"],
+    [v.price.trim() !== "", "Pune un preț"],
+    [!!v.county && !!v.city.trim(), "Spune unde se află"],
+    [v.description.trim().length >= 40, "Descrie produsul în câteva rânduri"],
+    [v.images.length >= 5, "Adaugă cel puțin 5 poze"],
+  ];
+  const done = steps.filter(([ok]) => ok).length;
+  return { value: (done / steps.length) * 100, next: steps.find(([ok]) => !ok)?.[1] };
 }
 
 function ImageUploader({
@@ -140,62 +161,15 @@ function ImageUploader({
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-        {images.map((img, i) => (
-          <div
-            key={img.storageId}
-            className={cn(
-              "group relative aspect-square overflow-hidden rounded-lg border bg-muted",
-              i === 0 && "ring-2 ring-primary",
-            )}
-          >
-            {img.url && <img src={img.url} alt="" className="size-full object-cover" />}
-            {i === 0 && (
-              <span className="absolute bottom-1 left-1 rounded bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-                Principală
-              </span>
-            )}
-            <div className="absolute top-1 right-1 flex gap-1">
-              {i > 0 && (
-                <button
-                  type="button"
-                  title="Fă imaginea principală"
-                  className="rounded-full bg-black/60 p-1 text-white"
-                  onClick={() => onChange([img, ...images.filter((_, j) => j !== i)])}
-                >
-                  <Star className="size-3" />
-                </button>
-              )}
-              <button
-                type="button"
-                title="Șterge imaginea"
-                className="rounded-full bg-black/60 p-1 text-white"
-                onClick={() => onChange(images.filter((_, j) => j !== i))}
-              >
-                <X className="size-3" />
-              </button>
-            </div>
-          </div>
-        ))}
-        {Array.from({ length: uploading }, (_, i) => (
-          <div key={`u${i}`} className="flex aspect-square items-center justify-center rounded-lg border bg-muted">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          </div>
-        ))}
-        {images.length + uploading < MAX_IMAGES && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed text-xs text-muted-foreground transition hover:border-primary hover:text-primary"
-          >
-            <ImagePlus className="size-6" />
-            Adaugă poze
-          </button>
-        )}
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Până la {MAX_IMAGES} poze, maximum 8 MB fiecare. Prima poză apare în rezultatele căutării.
-      </p>
+      <PhotoUploader
+        photos={images.map((img) => ({ id: img.storageId, src: img.url }))}
+        max={MAX_IMAGES}
+        uploading={uploading}
+        onAdd={() => inputRef.current?.click()}
+        onRemove={(i) => onChange(images.filter((_, j) => j !== i))}
+        onMakeCover={(i) => onChange([images[i]!, ...images.filter((_, j) => j !== i)])}
+        hint="Maximum 8 MB fiecare. Prima poză apare în rezultate; anunțurile cu 5+ poze primesc mai multe mesaje."
+      />
       <input
         ref={inputRef}
         type="file"
@@ -228,6 +202,7 @@ export function ListingForm({
   const category = getCategory(v.category);
   const attrs = category?.attributes ?? [];
   const showCondition = !["imobiliare", "locuri-de-munca", "servicii", "animale"].includes(v.category);
+  const progress = completeness(v);
 
   return (
     <form
@@ -246,6 +221,14 @@ export function ListingForm({
         }
       }}
     >
+      <div className="panel sticky top-16 z-10 p-4 sm:p-5">
+        <ProgressBar
+          value={progress.value}
+          label={progress.value >= 100 ? "Anunț complet!" : `${Math.round(progress.value)}% complet`}
+          hint={progress.next ?? "Arată foarte bine"}
+        />
+      </div>
+
       <Section title="Ce vinzi?">
         <div>
           <label className="label" htmlFor="title">
@@ -262,50 +245,37 @@ export function ListingForm({
             onChange={(e) => set("title", e.target.value)}
           />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label" htmlFor="category">
-              Categorie
-            </label>
-            <select
-              id="category"
-              className="field"
-              required
-              value={v.category}
-              onChange={(e) => setV((p) => ({ ...p, category: e.target.value, subcategory: "" }))}
-            >
-              <option value="">Alege categoria</option>
-              {CATEGORIES.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label" htmlFor="subcategory">
-              Subcategorie
-            </label>
-            <select
-              id="subcategory"
-              className="field"
-              required
-              disabled={!category}
-              value={v.subcategory}
-              onChange={(e) => set("subcategory", e.target.value)}
-            >
-              <option value="">Alege subcategoria</option>
-              {category?.subcategories.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+        <div>
+          <span className="label">Categorie</span>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            {CATEGORIES.map((c) => (
+              <ChoiceTile
+                key={c.slug}
+                icon={<CategoryIcon icon={c.icon} />}
+                label={categoryShortName(c.slug, c.name)}
+                tint={categoryTintName(c.slug)}
+                selected={v.category === c.slug}
+                onSelect={() => setV((p) => ({ ...p, category: c.slug, subcategory: p.category === c.slug ? p.subcategory : "" }))}
+                className="gap-4 p-3"
+              />
+            ))}
           </div>
         </div>
+        {category && (
+          <div>
+            <span className="label">Subcategorie</span>
+            <div className="flex flex-wrap gap-2">
+              {category.subcategories.map((sc) => (
+                <button key={sc.slug} type="button" className="chip chip-sm" aria-pressed={v.subcategory === sc.slug} onClick={() => set("subcategory", sc.slug)}>
+                  {sc.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </Section>
 
-      <Section title="Poze">
+      <Section title="Poze" hint="Lumină naturală, fundal simplu, din mai multe unghiuri.">
         <ImageUploader images={v.images} onChange={(images) => set("images", images)} />
       </Section>
 
@@ -329,24 +299,16 @@ export function ListingForm({
         {showCondition && (
           <div>
             <span className="label">Stare</span>
-            <div className="flex gap-2">
-              {(
-                [
-                  ["new", "Nou"],
-                  ["used", "Folosit"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={v.condition === value}
-                  onClick={() => set("condition", v.condition === value ? "" : value)}
-                  className={cn("btn btn-outline", v.condition === value && "border-primary bg-primary text-primary-foreground hover:bg-primary")}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <RadioCards<"new" | "used">
+              columns={2}
+              name="condition"
+              value={v.condition || undefined}
+              onValueChange={(c) => set("condition", c)}
+              options={[
+                { value: "new", label: "Nou", description: "Nefolosit, în ambalaj sau cu etichetă", icon: <PackageCheck /> },
+                { value: "used", label: "Folosit", description: "A mai fost folosit și funcționează", icon: <Recycle /> },
+              ]}
+            />
           </div>
         )}
 
@@ -414,32 +376,37 @@ export function ListingForm({
         )}
       </Section>
 
-      <Section title="Preț">
-        <div className="grid gap-4 sm:grid-cols-2">
+      <Section title="Preț" hint="Un preț corect se vinde mai repede. Pune 0 dacă îl dai gratuit.">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
           <div>
             <label className="label" htmlFor="price">
-              Preț (lei)
+              Preț
             </label>
-            <input
+            <AffixField
               id="price"
-              className="field"
+              end="lei"
               inputMode="numeric"
-              placeholder="0 = gratuit"
+              placeholder="ex. 450"
               required
               value={v.price}
               onChange={(e) => set("price", e.target.value)}
             />
           </div>
-          <label className="flex items-center gap-2 self-end pb-2 text-sm">
-            <input
-              type="checkbox"
-              className="size-4 accent-[var(--primary)]"
-              checked={v.negotiable}
-              onChange={(e) => set("negotiable", e.target.checked)}
-            />
-            Preț negociabil
-          </label>
+          <button type="button" className="chip w-fit pl-2" aria-pressed={v.price.trim() === "0"} onClick={() => set("price", v.price.trim() === "0" ? "" : "0")}>
+            <span className="flex size-6 items-center justify-center rounded-full bg-highlight text-highlight-foreground [&_svg]:size-3.5">
+              <Gift />
+            </span>
+            Îl dau gratuit
+          </button>
         </div>
+        {v.price.trim() !== "0" && (
+          <Switch
+            checked={v.negotiable}
+            onCheckedChange={(c) => set("negotiable", c)}
+            label="Preț negociabil"
+            description="Cumpărătorii văd insigna Negociabil și îți pot face oferte."
+          />
+        )}
       </Section>
 
       <Section title="Locație și contact">
@@ -465,9 +432,9 @@ export function ListingForm({
             <label className="label" htmlFor="phone">
               Telefon (opțional)
             </label>
-            <input
+            <AffixField
               id="phone"
-              className="field"
+              start={<Phone />}
               type="tel"
               autoComplete="tel"
               placeholder="07xx xxx xxx"
@@ -482,7 +449,7 @@ export function ListingForm({
       </Section>
 
       <div className="flex justify-end">
-        <button type="submit" className="btn btn-primary h-12 px-8 text-base" disabled={submitting}>
+        <button type="submit" className="btn btn-primary btn-lg w-full px-8 sm:w-auto" disabled={submitting}>
           {submitting && <Loader2 className="animate-spin" />}
           {submitLabel}
         </button>

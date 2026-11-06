@@ -64,6 +64,11 @@ const TINTS: Record<string, string> = {
   servicii: "peach",
 };
 
+/** Name of the pastel tint for a category (lavender, butter, …). */
+export function categoryTintName(slug: string) {
+  return TINTS[slug] ?? "slate";
+}
+
 /** Inline style that tints a `.tile-tinted` element for this category. */
 export function categoryTint(slug: string) {
   return { "--tile-tint": `var(--ofry-tint-${TINTS[slug] ?? "slate"})` } as React.CSSProperties;

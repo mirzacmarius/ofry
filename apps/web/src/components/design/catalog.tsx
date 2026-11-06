@@ -532,7 +532,7 @@ function ChatBlock() {
             </MessageBubble>
             <TypingBubble name="Maria" />
             <QuickReplies replies={["Mai e disponibil?", "Care e prețul final?", "Unde se poate ridica?", "Faceți livrare?"]} />
-            <ChatComposer />
+            <ChatComposer extras />
           </div>
         </Specimen>
       </div>
@@ -552,7 +552,7 @@ function PostingBlock() {
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Specimen label="Încărcare poze">
           <div className="panel p-5">
-            <PhotoUploader photos={[P.sofa, P.lamp, P.flat]} uploading={1} />
+            <PhotoUploader photos={[P.sofa, P.lamp, P.flat].map((src, i) => ({ id: String(i), src }))} uploading={1} onRemove={() => {}} onMakeCover={() => {}} />
           </div>
         </Specimen>
         <Specimen label="Alege categoria">
@@ -721,7 +721,7 @@ function ScreensBlock() {
           </div>
           <div className="space-y-2 border-t border-border p-3">
             <QuickReplies replies={["Ne vedem!", "Trimite locația"]} />
-            <ChatComposer />
+            <ChatComposer extras />
           </div>
         </PhoneFrame>
 

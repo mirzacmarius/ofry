@@ -1,21 +1,27 @@
+import { EmptyArt } from "@ofry/ui/components/ofry-feedback";
+import { cn } from "@ofry/ui/lib/utils";
 import type { ReactNode } from "react";
 
+/** Friendly empty state: pastel art, a title, one line of help and an optional action. */
 export function EmptyState({
   icon,
   title,
   children,
+  action,
+  className,
 }: {
   icon: ReactNode;
   title: string;
   children?: ReactNode;
+  action?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 surface px-6 py-14 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-background text-foreground [&_svg]:size-6">
-        {icon}
-      </div>
-      <h3 className="text-base font-semibold">{title}</h3>
-      {children && <div className="max-w-sm text-sm text-muted-foreground">{children}</div>}
+    <div className={cn("surface flex flex-col items-center px-6 py-12 text-center", className)}>
+      <EmptyArt icon={icon} className="size-32" />
+      <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+      {children && <div className="mt-1 max-w-sm text-sm text-muted-foreground">{children}</div>}
+      {action && <div className="mt-5">{action}</div>}
     </div>
   );
 }

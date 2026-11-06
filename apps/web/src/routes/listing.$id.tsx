@@ -4,13 +4,35 @@ import { ImageDots } from "@ofry/ui/components/ofry";
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, ImageOff, MapPin, Pencil, Phone, Send, Share, ShieldCheck, User } from "lucide-react";
+import { Alert, SafetyTip } from "@ofry/ui/components/ofry-feedback";
+import { FairPriceMeter, KeyFacts, MapPreview, PriceTag, SellerCard, TrustBadge } from "@ofry/ui/components/ofry-market";
+import {
+  ArrowLeft,
+  BedDouble,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Cog,
+  Eye,
+  Fuel,
+  Gauge,
+  ImageOff,
+  MapPin,
+  Pencil,
+  Phone,
+  Ruler,
+  Send,
+  Share,
+  Sparkles,
+  Store,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { FavoriteButton } from "@/components/favorite-button";
 import Loader from "@/components/loader";
-import { categoryName, errorMessage, formatNumber, formatPrice, subcategoryName, timeAgo } from "@/lib/format";
+import { categoryName, errorMessage, formatNumber, monthYear, subcategoryName, timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/listing/$id")({
   component: ListingPage,
@@ -177,14 +199,15 @@ function ListingPage() {
     );
   }
 
-  const specs: [string, string][] = [];
-  if (listing.condition) specs.push(["Stare", listing.condition === "new" ? "Nou" : "Folosit"]);
-  if (listing.year) specs.push(["An fabricație", String(listing.year)]);
-  if (listing.mileage !== undefined) specs.push(["Kilometraj", `${formatNumber(listing.mileage)} km`]);
-  if (listing.fuel) specs.push(["Combustibil", listing.fuel]);
-  if (listing.gearbox) specs.push(["Cutie de viteze", listing.gearbox]);
-  if (listing.rooms) specs.push(["Camere", String(listing.rooms)]);
-  if (listing.area) specs.push(["Suprafață utilă", `${listing.area} m²`]);
+  const specs: { icon: ReactNode; label: string; value: string }[] = [];
+  if (listing.condition) specs.push({ icon: <Sparkles />, label: "Stare", value: listing.condition === "new" ? "Nou" : "Folosit" });
+  if (listing.year) specs.push({ icon: <CalendarDays />, label: "An fabricație", value: String(listing.year) });
+  if (listing.mileage !== undefined) specs.push({ icon: <Gauge />, label: "Kilometraj", value: `${formatNumber(listing.mileage)} km` });
+  if (listing.fuel) specs.push({ icon: <Fuel />, label: "Combustibil", value: listing.fuel });
+  if (listing.gearbox) specs.push({ icon: <Cog />, label: "Cutie de viteze", value: listing.gearbox });
+  if (listing.rooms) specs.push({ icon: <BedDouble />, label: "Camere", value: String(listing.rooms) });
+  if (listing.area) specs.push({ icon: <Ruler />, label: "Suprafață utilă", value: `${listing.area} m²` });
+  const stats = listing.priceStats;
 
   const canContact = !listing.isOwner && listing.status === "active";
 
@@ -219,9 +242,22 @@ function ListingPage() {
       </nav>
 
       {listing.status !== "active" && (
-        <div className="surface mb-4 px-4 py-3 text-sm font-medium">
-          {listing.status === "sold" ? "Acest produs a fost vândut." : "Acest anunț este dezactivat și nu apare în căutări."}
-        </div>
+        <Alert
+          tone={listing.status === "sold" ? "info" : "warning"}
+          className="mb-4"
+          title={listing.status === "sold" ? "Acest produs a fost vândut" : "Anunț dezactivat"}
+          action={
+            listing.status === "sold" ? (
+              <Link to="/search" search={{ category: listing.category, subcategory: listing.subcategory }} className="btn btn-primary btn-sm">
+                Vezi anunțuri similare
+              </Link>
+            ) : undefined
+          }
+        >
+          {listing.status === "sold"
+            ? "Vânzătorul l-a marcat ca vândut. Poate găsești ceva asemănător."
+            : "Nu apare în căutări. Îl poți reactiva din Anunțurile mele."}
+        </Alert>
       )}
 
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
@@ -235,9 +271,9 @@ function ListingPage() {
                 {subcategoryName(listing.category, listing.subcategory)}
               </Link>
               {listing.condition && <span className="badge">{listing.condition === "new" ? "Nou" : "Folosit"}</span>}
-              {listing.negotiable && listing.price > 0 && <span className="badge badge-brand">Negociabil</span>}
+              {listing.price === 0 && <span className="badge badge-highlight">Gratuit</span>}
             </div>
-            <div className="mt-4 text-title font-bold text-price lg:hidden">{formatPrice(listing.price)}</div>
+            <PriceTag price={listing.price} negotiable={listing.negotiable} size="lg" className="mt-4 lg:hidden" />
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <MapPin className="size-4" /> {listing.city}, {listing.county}
@@ -249,15 +285,15 @@ function ListingPage() {
             </div>
           </div>
 
-          {specs.length > 0 && (
-            <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {specs.map(([k, val]) => (
-                <div key={k} className="surface rounded-xl px-4 py-3">
-                  <dt className="text-xs text-muted-foreground">{k}</dt>
-                  <dd className="mt-0.5 font-semibold">{val}</dd>
-                </div>
-              ))}
-            </dl>
+          {specs.length > 0 && <KeyFacts facts={specs} className="sm:grid-cols-3 xl:grid-cols-4" />}
+
+          {stats && (
+            <section>
+              <FairPriceMeter price={listing.price} low={stats.low} high={stats.high} />
+              <p className="mt-2 px-1 text-xs text-muted-foreground">
+                Comparat cu {stats.count} anunțuri active din {subcategoryName(listing.category, listing.subcategory)}. Orientativ, nu o evaluare.
+              </p>
+            </section>
           )}
 
           <section>
@@ -269,15 +305,17 @@ function ListingPage() {
             )}
           </section>
 
+          <section>
+            <h2 className="mb-3 text-lg font-semibold">Locație</h2>
+            <MapPreview place={`${listing.city}, ${listing.county}`} detail="Locul exact îl stabilești cu vânzătorul" className="max-w-lg" />
+          </section>
+
           <p className="text-xs text-muted-foreground">ID anunț: {listing._id}</p>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="panel hidden space-y-5 p-6 lg:block">
-            <div>
-              <div className="text-title font-bold text-price">{formatPrice(listing.price)}</div>
-              {listing.negotiable && listing.price > 0 && <div className="mt-1 text-sm text-muted-foreground">Preț negociabil</div>}
-            </div>
+            <PriceTag price={listing.price} negotiable={listing.negotiable} size="lg" />
             <div className="flex gap-2">
               {listing.isOwner ? (
                 <Link to="/edit/$id" params={{ id: listing._id }} className="btn btn-primary flex-1">
@@ -295,27 +333,31 @@ function ListingPage() {
             )}
           </div>
 
-          <div className="panel space-y-5 p-6">
-            <Link to="/seller/$id" params={{ id: listing.sellerId }} className="group flex items-center gap-3">
-              <span className="flex size-12 items-center justify-center rounded-full bg-surface">
-                <User className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-semibold group-hover:underline">{listing.sellerName}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {listing.sellerListingCount} {listing.sellerListingCount === 1 ? "anunț activ" : "anunțuri active"}
-                </span>
-              </span>
-              <ChevronRight className="size-5 text-muted-foreground" />
-            </Link>
+          <SellerCard
+            name={listing.sellerName}
+            memberSince={listing.sellerSince ? monthYear(listing.sellerSince) : "—"}
+            activeListings={listing.sellerListingCount}
+            badges={listing.phone ? <TrustBadge icon={<Phone />}>Telefon în anunț</TrustBadge> : undefined}
+            actions={
+              <Link to="/seller/$id" params={{ id: listing.sellerId }} className="btn btn-secondary flex-1">
+                <Store /> Toate anunțurile
+              </Link>
+            }
+          />
 
-            {canContact && <ContactBox listingId={listing._id} sellerName={listing.sellerName} />}
-          </div>
+          {canContact && (
+            <div className="panel p-5">
+              <ContactBox listingId={listing._id} sellerName={listing.sellerName} />
+            </div>
+          )}
 
-          <p className="flex gap-2 px-1 text-xs text-muted-foreground">
-            <ShieldCheck className="size-4 shrink-0" />
-            Sfat: nu plăti în avans și verifică produsul înainte de a-l cumpăra.
-          </p>
+          <SafetyTip
+            tips={[
+              "Nu plăti în avans și nu trimite coduri primite prin SMS.",
+              "Vezi produsul înainte să plătești.",
+              "Vorbește prin mesajele Ofry, nu prin linkuri primite.",
+            ]}
+          />
         </aside>
       </div>
 

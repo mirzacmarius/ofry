@@ -96,6 +96,7 @@ function SellerCard({
   reviews,
   responseTime,
   activeListings,
+  sold,
   badges,
   online,
   verified,
@@ -109,6 +110,7 @@ function SellerCard({
   reviews?: number;
   responseTime?: string;
   activeListings?: number;
+  sold?: number;
   badges?: React.ReactNode;
   online?: boolean;
   verified?: boolean;
@@ -131,7 +133,7 @@ function SellerCard({
           )}
         </div>
       </div>
-      <dl className="mt-4 grid grid-cols-2 gap-2 text-center">
+      <dl className="mt-4 grid auto-cols-fr grid-flow-col gap-2 text-center">
         {responseTime && (
           <div className="surface rounded-xl px-2 py-2.5">
             <dt className="text-[11px] text-muted-foreground">Răspunde</dt>
@@ -142,6 +144,12 @@ function SellerCard({
           <div className="surface rounded-xl px-2 py-2.5">
             <dt className="text-[11px] text-muted-foreground">Anunțuri active</dt>
             <dd className="text-sm font-semibold">{activeListings}</dd>
+          </div>
+        )}
+        {sold !== undefined && (
+          <div className="surface rounded-xl px-2 py-2.5">
+            <dt className="text-[11px] text-muted-foreground">Vândute</dt>
+            <dd className="text-sm font-semibold">{sold}</dd>
           </div>
         )}
       </dl>

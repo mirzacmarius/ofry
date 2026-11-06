@@ -81,11 +81,16 @@ function HomeComponent() {
         {latest === undefined ? (
           <ListingGridSkeleton />
         ) : latest.length === 0 ? (
-          <EmptyState icon={<Store />} title="Încă nu există anunțuri">
-            Fii primul care publică un anunț pe Ofry.{" "}
-            <Link to="/new" className="font-medium underline underline-offset-4">
-              Adaugă un anunț
-            </Link>
+          <EmptyState
+            icon={<Store />}
+            title="Încă nu există anunțuri"
+            action={
+              <Link to="/new" className="btn btn-primary">
+                Adaugă un anunț
+              </Link>
+            }
+          >
+            Fii primul care publică un anunț pe Ofry.
           </EmptyState>
         ) : (
           <ListingGrid listings={latest} />
