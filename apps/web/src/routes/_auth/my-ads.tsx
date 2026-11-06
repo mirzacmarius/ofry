@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_auth/my-ads")({
 });
 
 const STATUS = {
-  active: { label: "Activ", className: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300" },
-  sold: { label: "Vândut", className: "bg-muted text-muted-foreground" },
-  inactive: { label: "Dezactivat", className: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300" },
+  active: { label: "Activ", className: "badge-brand" },
+  sold: { label: "Vândut", className: "badge-dark" },
+  inactive: { label: "Dezactivat", className: "" },
 } as const;
 
 type Tab = "all" | keyof typeof STATUS;
@@ -44,21 +44,19 @@ function MyAdsPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Anunțurile mele</h1>
-        <Link to="/new" className="btn btn-primary">
+        <Link to="/new" className="btn btn-accent">
           <Plus /> Anunț nou
         </Link>
       </div>
 
-      <div className="mb-4 flex gap-1 overflow-x-auto border-b">
+      <div className="scroll-rail mb-5 gap-2">
         {(["all", "active", "sold", "inactive"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
-            className={cn(
-              "-mb-px border-b-2 px-3 py-2 text-sm whitespace-nowrap",
-              tab === t ? "border-primary font-semibold text-primary" : "border-transparent text-muted-foreground",
-            )}
+            aria-pressed={tab === t}
+            className="chip"
           >
             {t === "all" ? "Toate" : STATUS[t].label} ({count(t)})
           </button>
@@ -68,12 +66,12 @@ function MyAdsPage() {
       {listings === undefined ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+            <div key={i} className="surface h-28 animate-pulse" />
           ))}
         </div>
       ) : shown.length === 0 ? (
         <EmptyState icon={<Store />} title="Niciun anunț aici">
-          <Link to="/new" className="font-medium text-primary hover:underline">
+          <Link to="/new" className="font-medium underline underline-offset-4">
             Publică primul tău anunț
           </Link>
         </EmptyState>
@@ -83,7 +81,7 @@ function MyAdsPage() {
             const id = l._id as Id<"listings">;
             return (
               <li key={l._id} className="panel flex gap-4 p-3">
-                <Link to="/listing/$id" params={{ id }} className="size-24 shrink-0 overflow-hidden rounded-lg bg-muted">
+                <Link to="/listing/$id" params={{ id }} className="surface size-24 shrink-0 overflow-hidden rounded-xl">
                   {l.imageUrl ? (
                     <img src={l.imageUrl} alt="" className="size-full object-cover" />
                   ) : (
@@ -97,11 +95,11 @@ function MyAdsPage() {
                     <Link to="/listing/$id" params={{ id }} className="truncate font-medium hover:underline">
                       {l.title}
                     </Link>
-                    <span className={cn("ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-medium", STATUS[l.status].className)}>
+                    <span className={cn("badge ml-auto shrink-0", STATUS[l.status].className)}>
                       {STATUS[l.status].label}
                     </span>
                   </div>
-                  <div className="font-bold">{formatPrice(l.price)}</div>
+                  <div className="font-bold text-price">{formatPrice(l.price)}</div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>{timeAgo(l._creationTime)}</span>
                     <span className="flex items-center gap-1">

@@ -3,7 +3,7 @@ import { CATEGORIES, COUNTIES, getCategory } from "@ofry/backend/convex/lib/cons
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
-import { SearchX, SlidersHorizontal, X } from "lucide-react";
+import { Search, SearchX, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import z from "zod";
 
@@ -45,7 +45,7 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
           <li>
             <button
               type="button"
-              className={cn("w-full rounded-md px-2 py-1.5 text-left hover:bg-muted", !params.category && "font-semibold text-primary")}
+              className={cn("w-full rounded-md px-2.5 py-2 text-left hover:bg-surface", !params.category && "bg-surface font-semibold")}
               onClick={() => update({ category: undefined, subcategory: undefined })}
             >
               Toate categoriile
@@ -56,8 +56,8 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-muted",
-                  params.category === c.slug && "bg-brand-soft font-semibold text-primary",
+                  "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left hover:bg-surface",
+                  params.category === c.slug && "bg-surface font-semibold",
                 )}
                 onClick={() => update({ category: c.slug, subcategory: undefined })}
               >
@@ -71,8 +71,8 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
                       <button
                         type="button"
                         className={cn(
-                          "w-full rounded-md px-2 py-1 text-left text-muted-foreground hover:bg-muted",
-                          params.subcategory === s.slug && "font-semibold text-primary",
+                          "w-full rounded-md px-2.5 py-1.5 text-left text-muted-foreground hover:bg-surface hover:text-foreground",
+                          params.subcategory === s.slug && "font-semibold text-foreground",
                         )}
                         onClick={() => update({ subcategory: params.subcategory === s.slug ? undefined : s.slug })}
                       >
@@ -121,7 +121,7 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
           <span className="text-muted-foreground">–</span>
           <input className="field" inputMode="numeric" placeholder="Până la" aria-label="Preț maxim" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
         </div>
-        <button type="submit" className="btn btn-outline btn-sm mt-2 w-full">
+        <button type="submit" className="btn btn-secondary btn-sm mt-2 w-full">
           Aplică prețul
         </button>
       </form>
@@ -141,7 +141,8 @@ function Filters({ params, update }: { params: SearchParams; update: (p: Partial
                 key={label}
                 type="button"
                 onClick={() => update({ condition: value })}
-                className={cn("btn btn-outline btn-sm flex-1", params.condition === value && "border-primary bg-brand-soft text-primary")}
+                aria-pressed={params.condition === value}
+                className="chip chip-sm flex-1 justify-center"
               >
                 {label}
               </button>
@@ -199,7 +200,7 @@ function SearchPage() {
   const filterKey = `${params.minPrice}-${params.maxPrice}`;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="container-page py-4 sm:py-6">
       <form
         className="mb-5 flex gap-2"
         role="search"
@@ -208,28 +209,31 @@ function SearchPage() {
           update({ q: q.trim() || undefined });
         }}
       >
-        <input className="field h-11" placeholder="Ce cauți?" aria-label="Caută" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button type="submit" className="btn btn-primary h-11 px-6">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-[1.125rem] -translate-y-1/2 text-muted-foreground" />
+          <input className="field pl-10" placeholder="Ce cauți?" aria-label="Caută" enterKeyHint="search" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <button type="submit" className="btn btn-primary px-6">
           Caută
         </button>
       </form>
 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
         <aside className={cn("lg:block", showFilters ? "block" : "hidden")}>
-          <div className="panel p-4 lg:sticky lg:top-20">
+          <div className="panel p-5 lg:sticky lg:top-20">
             <Filters key={filterKey} params={params} update={update} />
           </div>
         </aside>
 
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-3">
-            <h1 className="mr-auto text-xl font-bold">{title}</h1>
-            <button type="button" className="btn btn-outline btn-sm lg:hidden" onClick={() => setShowFilters((s) => !s)}>
+            <h1 className="mr-auto text-heading font-semibold">{title}</h1>
+            <button type="button" className="chip chip-sm lg:hidden" aria-pressed={showFilters} onClick={() => setShowFilters((s) => !s)}>
               <SlidersHorizontal /> Filtre
             </button>
             <select
               aria-label="Sortează"
-              className="field h-8 w-auto text-xs"
+              className="field h-8 w-auto rounded-full pl-3 text-xs"
               value={params.sort ?? "newest"}
               disabled={!!params.q}
               title={params.q ? "Rezultatele căutării sunt ordonate după relevanță" : undefined}
@@ -251,7 +255,7 @@ function SearchPage() {
                     if ("q" in c.clear) setQ("");
                     update(c.clear);
                   }}
-                  className="flex items-center gap-1 rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-primary hover:bg-primary/15"
+                  className="chip chip-sm chip-active"
                 >
                   {c.label} <X className="size-3" />
                 </button>
@@ -273,7 +277,7 @@ function SearchPage() {
               <ListingGrid listings={results} />
               <div className="mt-6 flex justify-center">
                 {status === "CanLoadMore" && (
-                  <button type="button" className="btn btn-outline" onClick={() => loadMore(PAGE_SIZE)}>
+                  <button type="button" className="btn btn-secondary" onClick={() => loadMore(PAGE_SIZE)}>
                     Mai multe anunțuri
                   </button>
                 )}

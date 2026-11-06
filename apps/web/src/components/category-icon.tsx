@@ -30,3 +30,21 @@ export function CategoryIcon({ icon, ...props }: { icon: string } & LucideProps)
   const Icon = ICONS[icon as keyof typeof ICONS] ?? Tag;
   return <Icon {...props} />;
 }
+
+/** Short labels for tight spots (category rail, bottom sheets). */
+const SHORT_NAMES: Record<string, string> = {
+  imobiliare: "Imobiliare",
+  auto: "Auto",
+  electronice: "Electronice",
+  "casa-gradina": "Casă",
+  moda: "Modă",
+  copii: "Copii",
+  "sport-hobby": "Sport",
+  animale: "Animale",
+  "locuri-de-munca": "Joburi",
+  servicii: "Servicii",
+};
+
+export function categoryShortName(slug: string, fallback: string) {
+  return SHORT_NAMES[slug] ?? fallback;
+}

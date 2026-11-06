@@ -41,7 +41,7 @@ function MessagesLayout() {
                     params={{ conversationId: c._id }}
                     className={cn(
                       "flex gap-3 border-b px-3 py-3 hover:bg-muted/60",
-                      conversationId === c._id && "bg-brand-soft",
+                      conversationId === c._id && "bg-surface",
                     )}
                   >
                     <div className="size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
@@ -63,7 +63,7 @@ function MessagesLayout() {
                         {c.lastMessage}
                       </div>
                     </div>
-                    {c.unread && <span className="mt-1 size-2.5 shrink-0 rounded-full bg-primary" aria-label="Necitit" />}
+                    {c.unread && <span className="mt-1 size-2.5 shrink-0 rounded-full bg-brand" aria-label="Necitit" />}
                   </Link>
                 </li>
               ))}

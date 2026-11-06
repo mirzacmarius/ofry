@@ -341,7 +341,7 @@ export function ListingForm({
                   type="button"
                   aria-pressed={v.condition === value}
                   onClick={() => set("condition", v.condition === value ? "" : value)}
-                  className={cn("btn btn-outline", v.condition === value && "border-primary bg-brand-soft text-primary")}
+                  className={cn("btn btn-outline", v.condition === value && "border-primary bg-primary text-primary-foreground hover:bg-primary")}
                 >
                   {label}
                 </button>

@@ -4,7 +4,6 @@ import { useQuery } from "convex/react";
 import { Heart } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
-import { FavoriteButton } from "@/components/favorite-button";
 import { ListingCard, ListingGridSkeleton } from "@/components/listing-card";
 
 export const Route = createFileRoute("/_auth/favorites")({
@@ -22,21 +21,14 @@ function FavoritesPage() {
       ) : favorites.length === 0 ? (
         <EmptyState icon={<Heart />} title="Nu ai salvat niciun anunț">
           Apasă pe inimă la un anunț ca să îl găsești ușor mai târziu.{" "}
-          <Link to="/search" className="font-medium text-primary hover:underline">
+          <Link to="/search" className="font-medium underline underline-offset-4">
             Caută anunțuri
           </Link>
         </EmptyState>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
           {favorites.map((l) => (
-            <div key={l._id} className="relative">
-              <ListingCard listing={l} />
-              <FavoriteButton
-                listingId={l._id}
-                isFavorite
-                className="absolute top-2 right-2 rounded-full bg-white/90 p-1.5 shadow"
-              />
-            </div>
+            <ListingCard key={l._id} listing={l} isFavorite />
           ))}
         </div>
       )}

@@ -28,7 +28,7 @@ export function FavoriteButton({
       type="button"
       aria-label={isFavorite ? "Elimină de la favorite" : "Salvează la favorite"}
       aria-pressed={isFavorite}
-      className={cn(withLabel ? "btn btn-outline" : "", className)}
+      className={cn(withLabel ? "btn btn-secondary" : "", className)}
       onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -44,7 +44,7 @@ export function FavoriteButton({
         }
       }}
     >
-      <Heart className={cn("size-5", isFavorite && "fill-red-500 text-red-500")} />
+      <Heart className={cn(isFavorite && "fill-favorite text-favorite")} />
       {withLabel && (isFavorite ? "Salvat" : "Salvează")}
     </button>
   );

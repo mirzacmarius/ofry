@@ -2,7 +2,9 @@ import { Toaster } from "@ofry/ui/components/sonner";
 import { HeadContent, Link, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
+import { BottomNav } from "@/components/bottom-nav";
 import Header from "@/components/header";
+import { Logo } from "@/components/logo";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "../index.css";
@@ -28,7 +30,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function NotFound() {
   return (
     <div className="mx-auto max-w-md px-4 py-20 text-center">
-      <h1 className="text-3xl font-bold">Pagina nu există</h1>
+      <h1 className="text-title font-semibold">Pagina nu există</h1>
       <p className="mt-2 text-muted-foreground">Poate anunțul a fost șters sau linkul este greșit.</p>
       <Link to="/" className="btn btn-primary mt-6">
         Înapoi la prima pagină
@@ -39,9 +41,11 @@ function NotFound() {
 
 function Footer() {
   return (
-    <footer className="mt-16 border-t border-border">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-        <span>© {new Date().getFullYear()} Ofry.ro</span>
+    <footer className="mt-16 border-t border-border pb-20 md:pb-0">
+      <div className="container-page flex flex-col gap-3 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span className="flex items-center gap-3">
+          <Logo className="text-xl text-foreground" />© {new Date().getFullYear()} Ofry.ro
+        </span>
         <span>Cumpără și vinde simplu, în toată România.</span>
       </div>
     </footer>
@@ -59,6 +63,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <Footer />
+          <BottomNav />
         </div>
         <Toaster richColors position="top-center" />
       </ThemeProvider>

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "catalog:",
+    "@fontsource-variable/onest": "^5.3.1",
     "@ofry/backend": "workspace:*",
     "@ofry/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",

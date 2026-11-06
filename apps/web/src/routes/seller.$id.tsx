@@ -17,7 +17,7 @@ function SellerPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center gap-4">
-        <span className="flex size-14 items-center justify-center rounded-full bg-brand-soft text-primary">
+        <span className="flex size-14 items-center justify-center rounded-full bg-surface text-foreground">
           <User className="size-7" />
         </span>
         <div>
