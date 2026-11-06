@@ -1,15 +1,22 @@
 import { api } from "@ofry/backend/convex/_generated/api";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
-import { Heart, MessageCircle, Plus } from "lucide-react";
+import { Bell, Heart, MessageCircle, Plus } from "lucide-react";
 
 import { Logo } from "./logo";
 import { ModeToggle } from "./mode-toggle";
 import { SearchBar } from "./search-bar";
 import UserMenu from "./user-menu";
 
+function NotificationBadge() {
+  return <CountBadge count={useQuery(api.notifications.unreadCount)} />;
+}
+
 function UnreadBadge() {
-  const unread = useQuery(api.messages.unreadCount);
+  return <CountBadge count={useQuery(api.messages.unreadCount)} />;
+}
+
+function CountBadge({ count: unread }: { count: number | undefined }) {
   if (!unread) return null;
   return (
     <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-brand-foreground ring-2 ring-background">
@@ -49,6 +56,12 @@ export default function Header() {
                 <UnreadBadge />
               </span>
               <span className="hidden lg:inline">Mesaje</span>
+            </Link>
+            <Link to="/notifications" className="btn btn-ghost btn-icon" activeProps={{ className: "bg-surface" }} aria-label="Notificări">
+              <span className="relative">
+                <Bell />
+                <NotificationBadge />
+              </span>
             </Link>
           </Authenticated>
           <Link to="/new" className="btn btn-accent ml-1 hidden md:inline-flex">

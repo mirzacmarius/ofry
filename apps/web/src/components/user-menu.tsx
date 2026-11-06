@@ -36,6 +36,8 @@ export default function UserMenu() {
           <DropdownMenuItem onClick={() => navigate({ to: "/my-ads" })}>Anunțurile mele</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate({ to: "/favorites" })}>Favorite</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate({ to: "/messages" })}>Mesaje</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate({ to: "/notifications" })}>Notificări</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate({ to: "/saved-searches" })}>Căutări salvate</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"

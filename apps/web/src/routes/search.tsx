@@ -11,6 +11,7 @@ import z from "zod";
 import { CategoryIcon } from "@/components/category-icon";
 import { EmptyState } from "@/components/empty-state";
 import { ListingGrid, ListingGridSkeleton } from "@/components/listing-card";
+import { SaveSearchButton } from "@/components/save-search-button";
 import { categoryName, formatPrice, subcategoryName } from "@/lib/format";
 
 const searchSchema = z.object({
@@ -227,6 +228,7 @@ function SearchPage() {
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <h1 className="mr-auto text-heading font-semibold">{title}</h1>
+            <SaveSearchButton params={params} />
             <button type="button" className="chip chip-sm lg:hidden" aria-pressed={showFilters} onClick={() => setShowFilters((s) => !s)}>
               <SlidersHorizontal /> Filtre
             </button>

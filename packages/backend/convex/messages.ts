@@ -5,6 +5,7 @@ import type { WithoutSystemFields } from "convex/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { formatLei } from "./lib/constants";
+import { notify } from "./lib/notify";
 import { getUser, requireUser, type SessionUser } from "./lib/session";
 
 function cleanBody(body: string) {
@@ -147,6 +148,14 @@ export const makeOffer = mutation({
       .collect();
     for (const m of pending) await ctx.db.patch(m._id, { offerStatus: "declined" });
     await post(ctx, c, user.id, { body: "", kind: "offer", offerAmount: amount, offerStatus: "pending" });
+    await notify(ctx, {
+      userId: listing.sellerId,
+      kind: "offer",
+      title: `${user.name} ți-a făcut o ofertă`,
+      body: `de ${formatLei(amount)} pentru ${listing.title}`,
+      listingId: listing._id,
+      conversationId: c._id,
+    });
     return c._id;
   },
 });
@@ -163,6 +172,14 @@ export const respondToOffer = mutation({
     if (m.offerStatus !== "pending") throw new ConvexError("Ai răspuns deja la această ofertă.");
     await ctx.db.patch(m._id, { offerStatus: args.accept ? "accepted" : "declined" });
     const amount = formatLei(m.offerAmount ?? 0);
+    await notify(ctx, {
+      userId: c.buyerId,
+      kind: "offer_answer",
+      title: args.accept ? "Ofertă acceptată" : "Ofertă refuzată",
+      body: `${c.sellerName} a ${args.accept ? "acceptat" : "refuzat"} oferta ta de ${amount}`,
+      listingId: c.listingId,
+      conversationId: c._id,
+    });
     await post(ctx, c, user.id, {
       body: args.accept
         ? `Am acceptat oferta de ${amount}. Hai să stabilim cum facem predarea.`

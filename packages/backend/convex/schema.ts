@@ -12,6 +12,23 @@ export const reportReason = v.union(
   v.literal("prohibited"),
   v.literal("other"),
 );
+export const notificationKind = v.union(
+  v.literal("offer"),
+  v.literal("offer_answer"),
+  v.literal("price_drop"),
+  v.literal("saved_search"),
+  v.literal("expiring"),
+);
+/** The filters of a search, as in the /search URL. */
+export const searchParams = {
+  q: v.optional(v.string()),
+  category: v.optional(v.string()),
+  subcategory: v.optional(v.string()),
+  county: v.optional(v.string()),
+  condition: v.optional(v.union(v.literal("new"), v.literal("used"))),
+  minPrice: v.optional(v.number()),
+  maxPrice: v.optional(v.number()),
+};
 export const listingCondition = v.union(v.literal("new"), v.literal("used"));
 
 export const listingFields = {
@@ -96,6 +113,36 @@ export default defineSchema({
     /** For kind "image": the uploaded photo. */
     imageId: v.optional(v.id("_storage")),
   }).index("by_conversation", ["conversationId"]),
+
+  savedSearches: defineTable({
+    userId: v.string(),
+    ...searchParams,
+    /** Send a notification when new listings match. */
+    notify: v.boolean(),
+    /** Listings that matched since the user last opened this search. */
+    newCount: v.number(),
+    lastSeenAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_category", ["category"]),
+
+  notifications: defineTable({
+    userId: v.string(),
+    kind: notificationKind,
+    title: v.string(),
+    body: v.string(),
+    listingId: v.optional(v.id("listings")),
+    conversationId: v.optional(v.id("conversations")),
+    savedSearchId: v.optional(v.id("savedSearches")),
+    /** How many events this row stands for (new matches are grouped). */
+    count: v.optional(v.number()),
+    read: v.boolean(),
+    /** Updated when a grouped notification gets a new event. */
+    at: v.number(),
+  })
+    .index("by_user", ["userId", "at"])
+    .index("by_user_read", ["userId", "read", "at"])
+    .index("by_saved_search", ["savedSearchId", "read"]),
 
   reports: defineTable({
     listingId: v.id("listings"),

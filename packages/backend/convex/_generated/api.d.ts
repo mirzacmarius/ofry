@@ -16,12 +16,16 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as lib_cards from "../lib/cards.js";
 import type * as lib_constants from "../lib/constants.js";
+import type * as lib_notify from "../lib/notify.js";
 import type * as lib_placeholder from "../lib/placeholder.js";
+import type * as lib_searchMatch from "../lib/searchMatch.js";
 import type * as lib_seedData from "../lib/seedData.js";
 import type * as lib_session from "../lib/session.js";
 import type * as listings from "../listings.js";
 import type * as messages from "../messages.js";
+import type * as notifications from "../notifications.js";
 import type * as reports from "../reports.js";
+import type * as savedSearches from "../savedSearches.js";
 import type * as seed from "../seed.js";
 
   /**
@@ -40,12 +44,16 @@ import type * as seed from "../seed.js";
 "http": typeof http,
 "lib/cards": typeof lib_cards,
 "lib/constants": typeof lib_constants,
+"lib/notify": typeof lib_notify,
 "lib/placeholder": typeof lib_placeholder,
+"lib/searchMatch": typeof lib_searchMatch,
 "lib/seedData": typeof lib_seedData,
 "lib/session": typeof lib_session,
 "listings": typeof listings,
 "messages": typeof messages,
+"notifications": typeof notifications,
 "reports": typeof reports,
+"savedSearches": typeof savedSearches,
 "seed": typeof seed,
   }>;
   export declare const api: FilterApi<typeof fullApi, FunctionReference<any, "public">>;

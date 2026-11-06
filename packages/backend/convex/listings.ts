@@ -1,10 +1,12 @@
 import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { toCard } from "./lib/cards";
-import { getCategory, getSubcategory, MAX_IMAGES } from "./lib/constants";
+import { formatLei, getCategory, getSubcategory, MAX_IMAGES } from "./lib/constants";
+import { notify } from "./lib/notify";
 import { getUser, requireUser } from "./lib/session";
 import { listingFields, listingStatus } from "./schema";
 
@@ -269,7 +271,7 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     validate(args);
-    return await ctx.db.insert("listings", {
+    const id = await ctx.db.insert("listings", {
       ...args,
       title: args.title.trim(),
       description: args.description.trim(),
@@ -281,6 +283,8 @@ export const create = mutation({
       views: 0,
       searchText: buildSearchText(args),
     });
+    await ctx.scheduler.runAfter(0, internal.savedSearches.onListingCreated, { listingId: id });
+    return id;
   },
 });
 
@@ -320,6 +324,23 @@ export const update = mutation({
       ...priceChange,
       searchText: buildSearchText(fields),
     });
+    if (price < listing.price && listing.status === "active") {
+      // Tell everyone who saved the listing.
+      const favorites = await ctx.db
+        .query("favorites")
+        .withIndex("by_listing", (i) => i.eq("listingId", id))
+        .take(500);
+      for (const f of favorites) {
+        if (f.userId === listing.sellerId) continue;
+        await notify(ctx, {
+          userId: f.userId,
+          kind: "price_drop",
+          title: "Preț redus",
+          body: `la un anunț salvat: ${fields.title.trim()}, acum ${formatLei(price)}`,
+          listingId: id,
+        });
+      }
+    }
   },
 });
 
