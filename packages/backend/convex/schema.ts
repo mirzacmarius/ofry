@@ -28,6 +28,14 @@ export const searchParams = {
   condition: v.optional(v.union(v.literal("new"), v.literal("used"))),
   minPrice: v.optional(v.number()),
   maxPrice: v.optional(v.number()),
+  minYear: v.optional(v.number()),
+  maxYear: v.optional(v.number()),
+  maxMileage: v.optional(v.number()),
+  fuel: v.optional(v.string()),
+  gearbox: v.optional(v.string()),
+  minRooms: v.optional(v.number()),
+  minArea: v.optional(v.number()),
+  maxArea: v.optional(v.number()),
 };
 export const listingCondition = v.union(v.literal("new"), v.literal("used"));
 

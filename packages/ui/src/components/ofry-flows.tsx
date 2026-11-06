@@ -163,14 +163,33 @@ function SearchSuggest({
   recent,
   trending,
   matches,
+  onPick,
+  hideField,
   className,
 }: {
   query?: string;
   recent?: string[];
   trending?: string[];
-  matches?: { label: string; category: string; count: number }[];
+  /** `slug` is handed back to onPick to search inside that category. */
+  matches?: { label: string; category: string; count: number; slug?: string }[];
+  /** Makes the rows clickable. */
+  onPick?: (q: string, category?: string) => void;
+  /** Leave out the fake search field when it sits under a real one. */
+  hideField?: boolean;
   className?: string;
 }) {
+  const row = (content: React.ReactNode, pick: () => void, key: string, cls: string) =>
+    onPick ? (
+      <li key={key}>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={pick} className={cn(cls, "w-full text-left")}>
+          {content}
+        </button>
+      </li>
+    ) : (
+      <li key={key} className={cls}>
+        {content}
+      </li>
+    );
   const highlight = (text: string) => {
     if (!query) return text;
     const i = text.toLowerCase().indexOf(query.toLowerCase());
@@ -185,35 +204,47 @@ function SearchSuggest({
   };
   return (
     <div className={cn("w-full overflow-hidden rounded-3xl bg-card p-2 shadow-lg ring-1 ring-border", className)}>
-      <div className="flex h-12 items-center gap-3 rounded-2xl bg-surface px-4">
-        <Search className="size-5 text-muted-foreground" />
-        <span className={cn("flex-1 text-[0.9375rem]", !query && "text-muted-foreground")}>{query || "Caută pe Ofry"}</span>
-        {query && <span className="h-5 w-px animate-pulse bg-primary" />}
-      </div>
+      {!hideField && (
+        <div className="flex h-12 items-center gap-3 rounded-2xl bg-surface px-4">
+          <Search className="size-5 text-muted-foreground" />
+          <span className={cn("flex-1 text-[0.9375rem]", !query && "text-muted-foreground")}>{query || "Caută pe Ofry"}</span>
+          {query && <span className="h-5 w-px animate-pulse bg-primary" />}
+        </div>
+      )}
       {matches && matches.length > 0 && (
-        <ul className="mt-2">
-          {matches.map((m) => (
-            <li key={m.label + m.category} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-surface">
-              <Search className="size-4 shrink-0 text-muted-foreground" />
-              <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                {highlight(m.label)} <span className="text-brand-ink">în {m.category}</span>
-              </span>
-              <span className="text-xs text-muted-foreground tabular-nums">{m.count.toLocaleString("ro-RO")}</span>
-            </li>
-          ))}
+        <ul className={cn(!hideField && "mt-2")}>
+          {matches.map((m) =>
+            row(
+              <>
+                <Search className="size-4 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                  {highlight(m.label)} <span className="text-brand-ink">în {m.category}</span>
+                </span>
+                <span className="text-xs text-muted-foreground tabular-nums">{m.count.toLocaleString("ro-RO")}</span>
+              </>,
+              () => onPick?.(m.label, m.slug),
+              m.label + m.category,
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-surface",
+            ),
+          )}
         </ul>
       )}
       {recent && recent.length > 0 && (
-        <div className="mt-2 px-3 pt-2">
+        <div className={cn("px-3", (!hideField || (matches && matches.length > 0)) && "mt-2 pt-2", hideField && !matches?.length && "pt-1")}>
           <div className="mb-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Recente</div>
           <ul>
-            {recent.map((r) => (
-              <li key={r} className="-mx-3 flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface">
-                <Clock className="size-4 text-muted-foreground" />
-                <span className="flex-1">{r}</span>
-                <ArrowUpLeft className="size-4 text-muted-foreground" />
-              </li>
-            ))}
+            {recent.map((r) =>
+              row(
+                <>
+                  <Clock className="size-4 text-muted-foreground" />
+                  <span className="flex-1">{r}</span>
+                  <ArrowUpLeft className="size-4 text-muted-foreground" />
+                </>,
+                () => onPick?.(r),
+                r,
+                "-mx-3 flex w-[calc(100%+1.5rem)] items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-surface",
+              ),
+            )}
           </ul>
         </div>
       )}

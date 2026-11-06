@@ -37,6 +37,7 @@ import { ListingGrid } from "@/components/listing-card";
 import Loader from "@/components/loader";
 import { OfferDialog } from "@/components/offer-dialog";
 import { ReportDialog } from "@/components/report-dialog";
+import { rememberListing } from "@/lib/local-history";
 import { categoryName, errorMessage, formatNumber, monthYear, subcategoryName, timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/listing/$id")({
@@ -253,6 +254,11 @@ function ListingPage() {
   useEffect(() => {
     if (listingId) recordView({ id: listingId }).catch(() => {});
   }, [listingId, recordView]);
+  useEffect(() => {
+    if (!listing || listing.isOwner || listing.status !== "active") return;
+    const { _id, _creationTime, title, price, previousPrice, negotiable, category, subcategory, county, city, status, views, year, mileage, rooms, area } = listing;
+    rememberListing({ _id, _creationTime, title, price, previousPrice, negotiable, category, subcategory, county, city, status, views, year, mileage, rooms, area, imageUrl: listing.images[0]?.url ?? null });
+  }, [listing]);
 
   if (listing === undefined) return <Loader />;
   if (listing === null) {

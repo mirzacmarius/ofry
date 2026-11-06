@@ -1,4 +1,5 @@
 import { paginationOptsValidator } from "convex/server";
+import type { ObjectType } from "convex/values";
 import { ConvexError, v } from "convex/values";
 
 import { internal } from "./_generated/api";
@@ -73,71 +74,150 @@ async function similarPriceRange(
   return { low, high, count: prices.length };
 }
 
-export const search = query({
-  args: {
-    q: v.optional(v.string()),
-    category: v.optional(v.string()),
-    subcategory: v.optional(v.string()),
-    county: v.optional(v.string()),
-    condition: v.optional(v.union(v.literal("new"), v.literal("used"))),
-    minPrice: v.optional(v.number()),
-    maxPrice: v.optional(v.number()),
-    sort: v.optional(sortValidator),
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, args) => {
-    const q = args.q?.trim();
-    const sort = args.sort ?? "newest";
-    const { category, county, minPrice, maxPrice } = args;
+const searchArgs = {
+  q: v.optional(v.string()),
+  category: v.optional(v.string()),
+  subcategory: v.optional(v.string()),
+  county: v.optional(v.string()),
+  condition: v.optional(v.union(v.literal("new"), v.literal("used"))),
+  minPrice: v.optional(v.number()),
+  maxPrice: v.optional(v.number()),
+  // Cars
+  minYear: v.optional(v.number()),
+  maxYear: v.optional(v.number()),
+  maxMileage: v.optional(v.number()),
+  fuel: v.optional(v.string()),
+  gearbox: v.optional(v.string()),
+  // Real estate
+  minRooms: v.optional(v.number()),
+  minArea: v.optional(v.number()),
+  maxArea: v.optional(v.number()),
+  sort: v.optional(sortValidator),
+};
 
-    let base;
-    if (q) {
-      // Full text search is ordered by relevance.
-      base = ctx.db.query("listings").withSearchIndex("search_text", (s) => {
-        let f = s.search("searchText", q).eq("status", "active");
-        if (category) f = f.eq("category", category);
-        if (county) f = f.eq("county", county);
-        return f;
-      });
-    } else if (sort === "newest") {
-      base = (
-        category
-          ? ctx.db
-              .query("listings")
-              .withIndex("by_status_category", (i) =>
-                i.eq("status", "active").eq("category", category),
-              )
-          : ctx.db.query("listings").withIndex("by_status", (i) => i.eq("status", "active"))
-      ).order("desc");
-    } else {
-      const order = sort === "price_asc" ? "asc" : "desc";
-      base = (
-        category
-          ? ctx.db.query("listings").withIndex("by_status_category_price", (i) => {
-              const b = i.eq("status", "active").eq("category", category);
-              const lo = minPrice !== undefined ? b.gte("price", minPrice) : b;
-              return maxPrice !== undefined ? lo.lte("price", maxPrice) : lo;
-            })
-          : ctx.db.query("listings").withIndex("by_status_price", (i) => {
-              const b = i.eq("status", "active");
-              const lo = minPrice !== undefined ? b.gte("price", minPrice) : b;
-              return maxPrice !== undefined ? lo.lte("price", maxPrice) : lo;
-            })
-      ).order(order);
-    }
+type SearchArgs = ObjectType<typeof searchArgs>;
 
-    const filtered = base.filter((f) => {
-      const conds = [];
-      if (args.subcategory) conds.push(f.eq(f.field("subcategory"), args.subcategory));
-      if (county && !q) conds.push(f.eq(f.field("county"), county));
-      if (args.condition) conds.push(f.eq(f.field("condition"), args.condition));
-      if (minPrice !== undefined) conds.push(f.gte(f.field("price"), minPrice));
-      if (maxPrice !== undefined) conds.push(f.lte(f.field("price"), maxPrice));
-      return conds.length ? f.and(...conds) : true;
+/** The filtered listings query behind search and its result count. */
+function buildSearch(ctx: QueryCtx, args: SearchArgs) {
+  const q = args.q?.trim();
+  const sort = args.sort ?? "newest";
+  const { category, county, minPrice, maxPrice } = args;
+
+  let base;
+  if (q) {
+    // Full text search is ordered by relevance.
+    base = ctx.db.query("listings").withSearchIndex("search_text", (s) => {
+      let f = s.search("searchText", q).eq("status", "active");
+      if (category) f = f.eq("category", category);
+      if (county) f = f.eq("county", county);
+      return f;
     });
+  } else if (sort === "newest") {
+    base = (
+      category
+        ? ctx.db.query("listings").withIndex("by_status_category", (i) => i.eq("status", "active").eq("category", category))
+        : ctx.db.query("listings").withIndex("by_status", (i) => i.eq("status", "active"))
+    ).order("desc");
+  } else {
+    const order = sort === "price_asc" ? "asc" : "desc";
+    base = (
+      category
+        ? ctx.db.query("listings").withIndex("by_status_category_price", (i) => {
+            const b = i.eq("status", "active").eq("category", category);
+            const lo = minPrice !== undefined ? b.gte("price", minPrice) : b;
+            return maxPrice !== undefined ? lo.lte("price", maxPrice) : lo;
+          })
+        : ctx.db.query("listings").withIndex("by_status_price", (i) => {
+            const b = i.eq("status", "active");
+            const lo = minPrice !== undefined ? b.gte("price", minPrice) : b;
+            return maxPrice !== undefined ? lo.lte("price", maxPrice) : lo;
+          })
+    ).order(order);
+  }
 
-    const result = await filtered.paginate(args.paginationOpts);
+  return base.filter((f) => {
+    const conds = [];
+    if (args.subcategory) conds.push(f.eq(f.field("subcategory"), args.subcategory));
+    if (county && !q) conds.push(f.eq(f.field("county"), county));
+    if (args.condition) conds.push(f.eq(f.field("condition"), args.condition));
+    if (minPrice !== undefined) conds.push(f.gte(f.field("price"), minPrice));
+    if (maxPrice !== undefined) conds.push(f.lte(f.field("price"), maxPrice));
+    // Missing values sort below numbers, so a lower bound also drops listings without the field.
+    if (args.minYear !== undefined) conds.push(f.gte(f.field("year"), args.minYear));
+    if (args.maxYear !== undefined) conds.push(f.and(f.gte(f.field("year"), 0), f.lte(f.field("year"), args.maxYear)));
+    if (args.maxMileage !== undefined) conds.push(f.and(f.gte(f.field("mileage"), 0), f.lte(f.field("mileage"), args.maxMileage)));
+    if (args.fuel) conds.push(f.eq(f.field("fuel"), args.fuel));
+    if (args.gearbox) conds.push(f.eq(f.field("gearbox"), args.gearbox));
+    if (args.minRooms !== undefined) conds.push(f.gte(f.field("rooms"), args.minRooms));
+    if (args.minArea !== undefined) conds.push(f.gte(f.field("area"), args.minArea));
+    if (args.maxArea !== undefined) conds.push(f.and(f.gte(f.field("area"), 0), f.lte(f.field("area"), args.maxArea)));
+    return conds.length ? f.and(...conds) : true;
+  });
+}
+
+export const search = query({
+  args: { ...searchArgs, paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { paginationOpts, ...args }) => {
+    const result = await buildSearch(ctx, args).paginate(paginationOpts);
     return { ...result, page: await Promise.all(result.page.map((l) => toCard(ctx, l))) };
+  },
+});
+
+const COUNT_CAP = 1000;
+
+/** How many listings match, for "Arată 1.284 anunțuri". Capped. */
+export const searchCount = query({
+  args: searchArgs,
+  handler: async (ctx, args) => {
+    const rows = await buildSearch(ctx, args).take(COUNT_CAP + 1);
+    return { count: Math.min(rows.length, COUNT_CAP), capped: rows.length > COUNT_CAP };
+  },
+});
+
+/** Price spread in a category, for the slider's histogram. */
+export const priceHistogram = query({
+  args: { category: v.optional(v.string()), subcategory: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const BUCKETS = 20;
+    const { category } = args;
+    const rows = await (category
+      ? ctx.db.query("listings").withIndex("by_status_category", (i) => i.eq("status", "active").eq("category", category))
+      : ctx.db.query("listings").withIndex("by_status", (i) => i.eq("status", "active"))
+    )
+      .order("desc")
+      .take(2000);
+    const prices = rows
+      .filter((l) => !args.subcategory || l.subcategory === args.subcategory)
+      .map((l) => l.price)
+      .filter((p) => p > 0)
+      .sort((a, b) => a - b);
+    if (prices.length < 3) return null;
+    // Cut the long tail so the slider is usable; the top end means "no limit".
+    const p95 = prices[Math.floor(prices.length * 0.95)]!;
+    const magnitude = 10 ** Math.max(0, Math.floor(Math.log10(p95)) - 1);
+    const max = Math.ceil(p95 / magnitude) * magnitude;
+    const buckets = Array.from({ length: BUCKETS }, () => 0);
+    for (const p of prices) buckets[Math.min(BUCKETS - 1, Math.floor((p / max) * BUCKETS))]! += 1;
+    return { max, step: magnitude, buckets };
+  },
+});
+
+/** Search-as-you-type: which categories have matches for the words typed so far. */
+export const suggest = query({
+  args: { q: v.string() },
+  handler: async (ctx, args) => {
+    const q = args.q.trim();
+    if (q.length < 2) return [];
+    const rows = await ctx.db
+      .query("listings")
+      .withSearchIndex("search_text", (s) => s.search("searchText", q).eq("status", "active"))
+      .take(100);
+    const counts = new Map<string, number>();
+    for (const l of rows) counts.set(l.category, (counts.get(l.category) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([category, count]) => ({ category, count }));
   },
 });
 
