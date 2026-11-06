@@ -1,8 +1,9 @@
 # Ofry design system
 
-Ofry looks calm and photo-first: white pages, soft grey wells that hold photos
-and tiles, near-black text and buttons, one bright green "go" action per screen
-and a deep forest green for promotional banners. Corners are generously rounded
+Ofry looks calm and photo-first. The palette is **Smarald cald** (warm
+emerald): white pages, warm stone wells that hold photos and tiles, deep
+green-black ink for text and buttons, one emerald "go" action per screen, a
+deep emerald for promotional banners and coral for hearts. Corners are generously rounded
 and shadows are almost absent.
 
 Live preview: open **`/design`** in the app (tokens, every component, phone mock-ups).
@@ -27,19 +28,19 @@ Always use the role, never a raw value. Every role has a dark-mode value.
 | Role | Tailwind | Use for |
 | --- | --- | --- |
 | `--background` | `bg-background` | Page background (white) |
-| `--surface` | `bg-surface` | Photo wells, tiles, inputs, spec boxes |
+| `--surface` | `bg-surface` | Warm stone: photo wells, tiles, inputs, spec boxes |
 | `--surface-strong` | `bg-surface-strong` | Hover on surfaces |
-| `--primary` | `bg-primary` / `text-foreground` | Ink: text, default buttons, active chips |
-| `--brand` | `bg-brand` | The single bright-green CTA (Adaugă anunț, Sună), unread dots |
+| `--primary` | `bg-primary` / `text-foreground` | Green-black ink: text, default buttons, active chips |
+| `--brand` | `bg-brand` | Emerald: the single "go" CTA (Adaugă anunț, Sună), unread dots |
 | `--brand-ink` | `text-brand-ink` | Green text on light backgrounds |
 | `--brand-soft` | `bg-brand-soft` | Positive badges (Negociabil, Activ) |
-| `--promo` | `bg-promo` | Forest-green promotional banners |
+| `--promo` | `bg-promo` | Deep emerald promotional banners |
 | `--muted-foreground` | `text-muted-foreground` | Meta lines, help text |
 | `--border` | `border-border` | Hairlines on white panels |
 | `--price` | `text-price` | Prices (always bold) |
-| `--favorite` | `text-favorite` | Filled heart |
+| `--favorite` | `text-favorite` | Coral: filled heart |
 
-Text on the bright green is ink, not white, to keep AA contrast.
+White text on emerald passes WCAG AA (4.7:1). In dark mode the emerald lightens and its text turns dark.
 
 ## Type
 
@@ -69,7 +70,7 @@ Prices: `font-bold text-price`, formatted with `formatPrice()` (`1.850 lei`, `Gr
 **Buttons** (`.btn` + one variant, optional size)
 
 - `btn-primary` black: the normal action (Trimite mesaj, Caută, Intră în cont).
-- `btn-accent` green: the one "go" moment on a screen (Adaugă anunț, Sună). Never two on one screen.
+- `btn-accent` emerald: the one "go" moment on a screen (Adaugă anunț, Sună). Never two on one screen.
 - `btn-secondary` grey, `btn-outline`, `btn-ghost`, `btn-danger`, `btn-inverse` (white, on promo green).
 - Sizes: `btn-sm` (36), default (44), `btn-lg` (56, phone action bars). `btn-icon` makes it square.
 - `.icon-btn`: round translucent button for overlays on photos (heart, gallery arrows).

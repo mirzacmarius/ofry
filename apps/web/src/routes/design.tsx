@@ -51,13 +51,13 @@ const COLORS: { name: string; token: string; className: string; note: string }[]
   { name: "Suprafață", token: "--surface", className: "bg-surface", note: "Plăci, poze, câmpuri" },
   { name: "Suprafață tare", token: "--surface-strong", className: "bg-surface-strong", note: "Hover pe suprafețe" },
   { name: "Cerneală", token: "--primary", className: "bg-primary", note: "Text și butonul principal" },
-  { name: "Verde Ofry", token: "--brand", className: "bg-brand", note: "Un singur CTA „go” pe ecran" },
+  { name: "Smarald", token: "--brand", className: "bg-brand", note: "Un singur CTA „go” pe ecran" },
   { name: "Verde închis", token: "--brand-ink", className: "bg-brand-ink", note: "Text verde pe fundal deschis" },
   { name: "Verde pal", token: "--brand-soft", className: "bg-brand-soft", note: "Insigne pozitive" },
-  { name: "Pădure", token: "--promo", className: "bg-promo", note: "Bannere promoționale" },
+  { name: "Smarald închis", token: "--promo", className: "bg-promo", note: "Bannere promoționale" },
   { name: "Text secundar", token: "--muted-foreground", className: "bg-muted-foreground", note: "Meta, ajutor" },
   { name: "Bordură", token: "--border", className: "bg-border", note: "Linii fine, panouri" },
-  { name: "Favorit", token: "--favorite", className: "bg-favorite", note: "Inimă plină" },
+  { name: "Coral", token: "--favorite", className: "bg-favorite", note: "Inimă plină" },
   { name: "Rating", token: "--rating", className: "bg-rating", note: "Stele" },
 ];
 
@@ -98,8 +98,8 @@ function DesignPage() {
         <Logo className="text-4xl" />
         <h1 className="mt-4 text-title font-semibold sm:text-display">Sistemul de design</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Pagini albe, suprafețe gri deschis care țin pozele, text și butoane negre, un verde viu pentru acțiunea
-          principală și un verde de pădure pentru bannere. Colțuri rotunjite, umbre aproape deloc. Reguli complete în{" "}
+          Paleta „Smarald cald”: pagini albe, suprafețe calde de piatră care țin pozele, text și butoane verde-negru,
+          smarald pentru acțiunea principală, smarald închis pentru bannere și coral pentru inimi. Colțuri rotunjite, umbre aproape deloc. Reguli complete în{" "}
           <code className="rounded bg-surface px-1.5 py-0.5 text-sm">docs/DESIGN.md</code>.
         </p>
       </header>
@@ -280,7 +280,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Banner promo" description="Verde de pădure cu o formă mai deschisă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
+      <Block title="Banner promo" description="Smarald închis cu o formă mai deschisă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
         <PromoBanner
           title="Vinde gratuit pe Ofry"
           description="Publici un anunț în 2 minute, fără comision."

@@ -10,40 +10,41 @@
 /*
  * Ofry design tokens.
  *
- * The palette is deliberately small: white pages, soft grey surfaces that hold
- * photos and tiles, near-black ink for text and primary actions, a bright
- * green accent for "go" moments, and a deep forest green for promotional
- * surfaces. Everything else (borders, muted text) is a step on the neutral
- * scale, which has a hint of green so it sits well next to the brand colours.
+ * Palette "Smarald cald" (warm emerald): white pages, warm stone surfaces that
+ * hold photos and tiles, deep green-black ink for text and primary actions, an
+ * emerald green for the one "go" action per screen, a deep emerald for promo
+ * banners and a coral for hearts and deals. Neutrals lean warm so photos and
+ * the greens both feel friendly rather than clinical.
  *
  * See docs/DESIGN.md for usage rules and /design in the app for a live preview.
  */
 :root {
-  /* Neutral scale (greenish grey) */
-  --ofry-neutral-0: oklch(1 0 0);
-  --ofry-neutral-50: oklch(0.975 0.002 145);
-  --ofry-neutral-100: oklch(0.958 0.003 145);
-  --ofry-neutral-200: oklch(0.925 0.004 145);
-  --ofry-neutral-300: oklch(0.87 0.005 145);
-  --ofry-neutral-500: oklch(0.56 0.008 145);
-  --ofry-neutral-700: oklch(0.37 0.008 145);
-  --ofry-neutral-900: oklch(0.2 0.006 145);
-  --ofry-neutral-950: oklch(0.16 0.005 145);
+  /* Neutral scale (warm stone) */
+  --ofry-neutral-0: #ffffff;
+  --ofry-neutral-50: #faf9f6;
+  --ofry-neutral-100: #f5f3ed;
+  --ofry-neutral-200: #e9e6de;
+  --ofry-neutral-300: #d8d4ca;
+  --ofry-neutral-500: #6b6f68;
+  --ofry-neutral-700: #3d433e;
+  --ofry-neutral-900: #1b2a23;
+  --ofry-neutral-950: #11201a;
 
-  /* Brand */
-  --ofry-green-50: oklch(0.965 0.03 150);
-  --ofry-green-100: oklch(0.93 0.06 150);
-  --ofry-green-400: oklch(0.76 0.17 150);
-  --ofry-green-500: oklch(0.72 0.18 150);
-  --ofry-green-600: oklch(0.62 0.16 150);
-  --ofry-green-700: oklch(0.5 0.13 152);
-  --ofry-forest-700: oklch(0.38 0.07 160);
-  --ofry-forest-800: oklch(0.3 0.06 162);
-  --ofry-forest-900: oklch(0.25 0.05 163);
+  /* Brand: emerald */
+  --ofry-green-50: #e3f4eb;
+  --ofry-green-100: #c4e9d5;
+  --ofry-green-400: #34c487;
+  --ofry-green-500: #0a8254;
+  --ofry-green-600: #08744b;
+  --ofry-green-700: #066640;
+  --ofry-forest-700: #155741;
+  --ofry-forest-800: #0e4533;
+  --ofry-forest-900: #0a3a2b;
 
   /* Support */
-  --ofry-red-500: oklch(0.63 0.21 25);
-  --ofry-amber-400: oklch(0.8 0.16 75);
+  --ofry-coral-500: #f0553c;
+  --ofry-red-500: #d93a2b;
+  --ofry-amber-400: #f5a524;
 
   /* Semantic roles (shadcn names kept so every primitive picks them up) */
   --background: var(--ofry-neutral-0);
@@ -69,14 +70,14 @@
   --surface: var(--ofry-neutral-100);
   --surface-strong: var(--ofry-neutral-200);
   --brand: var(--ofry-green-500);
-  --brand-foreground: var(--ofry-neutral-950);
+  --brand-foreground: var(--ofry-neutral-0);
   --brand-ink: var(--ofry-green-700);
   --brand-soft: var(--ofry-green-50);
   --promo: var(--ofry-forest-900);
   --promo-highlight: var(--ofry-forest-700);
   --promo-foreground: var(--ofry-neutral-0);
   --price: var(--ofry-neutral-950);
-  --favorite: var(--ofry-red-500);
+  --favorite: var(--ofry-coral-500);
   --rating: var(--ofry-amber-400);
 
   --chart-1: var(--ofry-green-400);
@@ -98,43 +99,43 @@
 }
 
 .dark {
-  --background: var(--ofry-neutral-950);
-  --foreground: oklch(0.97 0.003 145);
-  --card: oklch(0.2 0.006 145);
-  --card-foreground: oklch(0.97 0.003 145);
-  --popover: oklch(0.2 0.006 145);
-  --popover-foreground: oklch(0.97 0.003 145);
-  --primary: oklch(0.97 0.003 145);
-  --primary-foreground: var(--ofry-neutral-950);
-  --secondary: oklch(0.24 0.007 145);
-  --secondary-foreground: oklch(0.97 0.003 145);
-  --muted: oklch(0.24 0.007 145);
-  --muted-foreground: oklch(0.7 0.008 145);
-  --accent: oklch(0.27 0.008 145);
-  --accent-foreground: oklch(0.97 0.003 145);
-  --destructive: oklch(0.7 0.19 25);
+  --background: #0f1512;
+  --foreground: #f3f1ea;
+  --card: #18201c;
+  --card-foreground: #f3f1ea;
+  --popover: #18201c;
+  --popover-foreground: #f3f1ea;
+  --primary: #f3f1ea;
+  --primary-foreground: #11201a;
+  --secondary: #1d2621;
+  --secondary-foreground: #f3f1ea;
+  --muted: #1d2621;
+  --muted-foreground: #a3a89f;
+  --accent: #232d27;
+  --accent-foreground: #f3f1ea;
+  --destructive: #f2705c;
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 14%);
   --ring: var(--ofry-green-400);
 
-  --surface: oklch(0.215 0.006 145);
-  --surface-strong: oklch(0.26 0.007 145);
+  --surface: #1b231f;
+  --surface-strong: #252f29;
   --brand: var(--ofry-green-400);
-  --brand-foreground: var(--ofry-neutral-950);
+  --brand-foreground: #0b1a13;
   --brand-ink: var(--ofry-green-400);
-  --brand-soft: oklch(0.27 0.05 155);
-  --promo: oklch(0.3 0.06 162);
-  --promo-highlight: oklch(0.36 0.07 160);
-  --promo-foreground: oklch(0.98 0 0);
-  --price: oklch(0.98 0 0);
-  --favorite: oklch(0.7 0.19 25);
+  --brand-soft: #173a2b;
+  --promo: #0e4533;
+  --promo-highlight: #155741;
+  --promo-foreground: #ffffff;
+  --price: #f3f1ea;
+  --favorite: #ff7a63;
 
-  --sidebar: oklch(0.2 0.006 145);
-  --sidebar-foreground: oklch(0.97 0.003 145);
+  --sidebar: #18201c;
+  --sidebar-foreground: #f3f1ea;
   --sidebar-primary: var(--ofry-green-400);
-  --sidebar-primary-foreground: var(--ofry-neutral-950);
-  --sidebar-accent: oklch(0.24 0.007 145);
-  --sidebar-accent-foreground: oklch(0.97 0.003 145);
+  --sidebar-primary-foreground: #0b1a13;
+  --sidebar-accent: #1d2621;
+  --sidebar-accent-foreground: #f3f1ea;
   --sidebar-border: oklch(1 0 0 / 9%);
   --sidebar-ring: var(--ofry-green-400);
 }

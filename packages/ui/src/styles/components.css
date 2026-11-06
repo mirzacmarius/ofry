@@ -30,7 +30,7 @@
   }
   /* White on promo green. */
   .btn-inverse {
-    @apply bg-white text-neutral-950 hover:bg-white/90;
+    @apply bg-white text-promo hover:bg-white/90;
   }
   .btn-danger {
     @apply bg-destructive/10 text-destructive hover:bg-destructive/15;
