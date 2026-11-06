@@ -9,6 +9,8 @@ import type { ReactNode } from "react";
 import { CategoryRailItem, CategoryTile } from "@/components/category-tile";
 import { ListingCard } from "@/components/listing-card";
 import { Logo } from "@/components/logo";
+import { CATALOG_SECTIONS, CatalogSections } from "@/components/design/catalog";
+import { Block } from "@/components/design/kit";
 import { SearchBar } from "@/components/search-bar";
 
 export const Route = createFileRoute("/design")({
@@ -73,15 +75,30 @@ const TYPE: { label: string; className: string; spec: string }[] = [
   { label: "Imagine demonstrativă", className: "text-xs text-muted-foreground", spec: "xs · 12/16 · regular" },
 ];
 
-function Block({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+const FOUNDATION_SECTIONS: [string, string][] = [
+  ["culori", "Culori"],
+  ["tipografie", "Tipografie"],
+  ["spatiere", "Spațiere"],
+  ["butoane", "Butoane"],
+  ["chips", "Chips"],
+  ["campuri", "Câmpuri"],
+  ["categorii", "Categorii"],
+  ["carduri", "Carduri"],
+  ["banner", "Banner"],
+  ["telefon", "Pe telefon"],
+];
+
+function SectionIndex() {
   return (
-    <section className="border-t border-border py-10">
-      <div className="mb-6">
-        <h2 className="text-heading font-semibold">{title}</h2>
-        {description && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{description}</p>}
+    <nav aria-label="Secțiuni" className="sticky top-16 z-20 mb-2 bg-background/85 py-3 backdrop-blur">
+      <div className="scroll-rail gap-1.5">
+        {[...FOUNDATION_SECTIONS, ...CATALOG_SECTIONS].map(([id, label]) => (
+          <a key={id} href={`#${id}`} className="chip chip-sm shrink-0">
+            {label}
+          </a>
+        ))}
       </div>
-      {children}
-    </section>
+    </nav>
   );
 }
 
@@ -105,9 +122,23 @@ function DesignPage() {
           categorii. Colțuri rotunjite, umbre aproape deloc. Reguli complete în{" "}
           <code className="rounded bg-surface px-1.5 py-0.5 text-sm">docs/DESIGN.md</code>.
         </p>
+        <div className="mt-6 flex flex-wrap gap-2 text-sm">
+          {[
+            ["10", "fundații"],
+            ["50+", "componente"],
+            ["3", "ecrane complete"],
+            ["2", "teme"],
+          ].map(([n, l]) => (
+            <span key={l} className="rounded-full bg-brand-soft px-3 py-1.5 text-brand-ink">
+              <b className="font-bold">{n}</b> {l}
+            </span>
+          ))}
+        </div>
       </header>
 
-      <Block title="Culori" description="Folosește rolurile semantice (bg-surface, text-price), nu valori brute. Toate au și variantă pentru tema întunecată.">
+      <SectionIndex />
+
+      <Block id="culori" title="Culori" description="Folosește rolurile semantice (bg-surface, text-price), nu valori brute. Toate au și variantă pentru tema întunecată.">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {COLORS.map((c) => (
             <div key={c.token} className="panel overflow-hidden">
@@ -130,7 +161,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Tipografie" description="Onest, un sans-serif geometric cu diacritice românești complete (ă, â, î, ș, ț). Titlurile au tracking ușor negativ.">
+      <Block id="tipografie" title="Tipografie" description="Onest, un sans-serif geometric cu diacritice românești complete (ă, â, î, ș, ț). Titlurile au tracking ușor negativ.">
         <div className="space-y-5">
           {TYPE.map((t) => (
             <div key={t.spec} className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
@@ -145,7 +176,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Spațiere, colțuri, umbre" description="Grilă de 4 px. Margini de pagină 16 px pe telefon, 24 px pe desktop. Secțiuni la 40–56 px distanță.">
+      <Block id="spatiere" title="Spațiere, colțuri, umbre" description="Grilă de 4 px. Margini de pagină 16 px pe telefon, 24 px pe desktop. Secțiuni la 40–56 px distanță.">
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-2">
             {[1, 2, 3, 4, 6, 8, 10, 14].map((n) => (
@@ -180,7 +211,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Butoane" description="Violet plin pentru acțiunea principală, contur violet pentru a doua acțiune de lângă ea (Sună), gri pentru restul. Un singur buton violet plin pe zonă.">
+      <Block id="butoane" title="Butoane" description="Violet plin pentru acțiunea principală, contur violet pentru a doua acțiune de lângă ea (Sună), gri pentru restul. Un singur buton violet plin pe zonă.">
         <div className="flex flex-wrap items-center gap-3">
           <button type="button" className="btn btn-primary">Trimite mesaj</button>
           <button type="button" className="btn btn-accent">
@@ -213,7 +244,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Chips și insigne" description="Chips pentru filtre și comutatoare (violet când sunt active). Insignele sunt doar informative; galbenul e pentru ce trebuie observat.">
+      <Block id="chips" title="Chips și insigne" description="Chips pentru filtre și comutatoare (violet când sunt active). Insignele sunt doar informative; galbenul e pentru ce trebuie observat.">
         <div className="flex flex-wrap items-center gap-2">
           <span className="chip chip-active">Noutăți</span>
           <span className="chip pl-2">
@@ -246,7 +277,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Câmpuri și căutare" description="Câmpurile sunt gri-lavandă, fără bordură; la focus devin albe cu inel violet.">
+      <Block id="campuri" title="Câmpuri și căutare" description="Câmpurile sunt gri-lavandă, fără bordură; la focus devin albe cu inel violet.">
         <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
           <SearchBar size="lg" placeholder="Ce cauți azi?" className="sm:col-span-2" />
           <div>
@@ -273,7 +304,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Categorii" description="Plăci pastel, câte o nuanță pe categorie: pe telefon un șir orizontal cu eticheta sub poză, pe desktop o grilă cu eticheta sus și iconița jos-dreapta.">
+      <Block id="categorii" title="Categorii" description="Plăci pastel, câte o nuanță pe categorie: pe telefon un șir orizontal cu eticheta sub poză, pe desktop o grilă cu eticheta sus și iconița jos-dreapta.">
         <div className="scroll-rail mb-6">
           {CATEGORIES.map((c) => (
             <CategoryRailItem key={c.slug} category={c} />
@@ -286,7 +317,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Carduri de anunț" description="Poza într-un godeu gri-lavandă cu colțuri de 22 px, inima în colț (violet când e salvat), insigna galbenă Gratuit, apoi titlul, prețul îngroșat și o linie de meta.">
+      <Block id="carduri" title="Carduri de anunț" description="Poza într-un godeu gri-lavandă cu colțuri de 22 px, inima în colț (violet când e salvat), insigna galbenă Gratuit, apoi titlul, prețul îngroșat și o linie de meta.">
         <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
           {SAMPLE.map((l, i) => (
             <ListingCard key={l._id} listing={l} isFavorite={i === 1} />
@@ -294,7 +325,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Banner promo" description="Gradient violet spre albastru-lavandă, cu o formă luminoasă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
+      <Block id="banner" title="Banner promo" description="Gradient violet spre albastru-lavandă, cu o formă luminoasă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
         <PromoBanner
           title="Vinde gratuit pe Ofry"
           description="Publici un anunț în 2 minute, fără comision."
@@ -315,7 +346,7 @@ function DesignPage() {
         />
       </Block>
 
-      <Block title="Pe telefon" description="Bara de jos cu cinci tab-uri și butonul violet de publicare în mijloc. Pagina de anunț își aduce propria bară cu Trimite mesaj și Sună.">
+      <Block id="telefon" title="Pe telefon" description="Bara de jos cu cinci tab-uri și butonul violet de publicare în mijloc. Pagina de anunț își aduce propria bară cu Trimite mesaj și Sună.">
         <div className="flex flex-wrap justify-center gap-10">
           <Phone375>
             <div className="space-y-4 p-4 pt-6">
@@ -380,6 +411,8 @@ function DesignPage() {
           </Phone375>
         </div>
       </Block>
+
+      <CatalogSections />
     </div>
   );
 }

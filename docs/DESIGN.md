@@ -16,6 +16,12 @@ Live preview: open **`/design`** in the app (tokens, every component, phone mock
 | Tokens (colour, type, radius, shadow) | `packages/ui/src/styles/globals.css` |
 | Component classes (`.btn`, `.chip`, `.field`…) | `packages/ui/src/styles/components.css` |
 | Presentational React components | `packages/ui/src/components/ofry.tsx` (`PromoBanner`, `SectionHeader`, `Rating`, `ImageDots`) |
+| Form controls | `packages/ui/src/components/ofry-forms.tsx` |
+| Feedback surfaces | `packages/ui/src/components/ofry-feedback.tsx` |
+| Marketplace pieces | `packages/ui/src/components/ofry-market.tsx` |
+| Chat and offers | `packages/ui/src/components/ofry-chat.tsx` |
+| Posting and search flows | `packages/ui/src/components/ofry-flows.tsx` |
+| Live catalogue | `/design` (`apps/web/src/routes/design.tsx`, `apps/web/src/components/design/`) |
 | App components built on the system | `apps/web/src/components/` (`listing-card`, `category-tile`, `search-bar`, `bottom-nav`, `logo`) |
 | Font | Onest Variable via `@fontsource-variable/onest` (full Romanian diacritics) |
 
@@ -99,6 +105,19 @@ Prices: `font-bold text-price`, formatted with `formatPrice()` (`1.850 lei`, `Gr
 **Section header**: `<SectionHeader title action />`, action usually `Vezi toate ›`.
 
 **Bottom nav** (phones only): Acasă, Caută, a violet round publish button, Favorite, Contul meu. Active tab is violet with a filled icon. It hides on the listing page, which brings its own sticky bar (violet Trimite mesaj + violet-outline Sună).
+
+## Component catalogue
+
+All of these are presentational: they take data and callbacks and hold at most
+their own UI state. Every one is shown on `/design`, in light and dark.
+
+| File | Components | Notes |
+| --- | --- | --- |
+| `ofry-forms` | `Switch`, `Checkbox`, `RadioCards`, `Segmented`, `Tabs`, `Stepper`, `PriceRange`, `RatingInput`, `AffixField` | Controlled or uncontrolled (`value` / `defaultValue`). `PriceRange` draws a histogram of the market above the slider. `AffixField` takes `start` / `end` slots. |
+| `ofry-feedback` | `Alert`, `SafetyTip`, `ToastCard`, `DialogCard`, `SheetCard`, `TooltipBubble`, `ProgressBar`, `ProgressRing`, `TypingDots`, `EmptyArt` | Alert tones: info, success, warning, danger. Toasts and tooltips are ink. Empty states pair `EmptyArt` with one verb button. |
+| `ofry-market` | `Avatar`, `AvatarStack`, `TrustBadge`, `SellerCard`, `PriceTag`, `FairPriceMeter`, `ListingRow`, `PromotedCard`, `KeyFacts`, `CollectionTile`, `Countdown`, `PlanCard`, `MapPreview`, `Sparkline`, `StatTile`, `NotificationItem`, `StepProgress`, `Pagination`, `formatLei` | Avatars without a photo get a pastel tint picked from the name. `FairPriceMeter` says Preț bun / Preț corect / Peste piață. `MapPreview` always shows an approximate zone, never an exact address. |
+| `ofry-chat` | `MessageBubble`, `OfferBubble`, `TypingBubble`, `DateDivider`, `QuickReplies`, `ChatComposer`, `ConversationRow` | Mine is violet with the tail bottom-right; theirs is grey. Offers are a gradient ticket with a status badge and Accept / Refuz while pending. |
+| `ofry-flows` | `PhotoUploader`, `ChoiceTile`, `SearchSuggest` | The first photo is the cover (2×2, yellow Copertă badge). `ChoiceTile` is a tinted tile with a check, for category pickers and onboarding. |
 
 ## Copy
 
