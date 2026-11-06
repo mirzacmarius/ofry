@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 import type * as React from "react";
 
 /**
- * Deep forest-green promotional banner. Use at most one per screen, for
+ * Violet-to-periwinkle promotional banner. Use at most one per screen, for
  * Ofry's own messages (publish for free, safety tips, seasonal campaigns).
  */
 function PromoBanner({
@@ -21,7 +21,7 @@ function PromoBanner({
     <div
       data-slot="promo-banner"
       className={cn(
-        "relative isolate flex items-center gap-4 overflow-hidden rounded-2xl bg-promo px-5 py-5 text-promo-foreground sm:px-8 sm:py-7",
+        "relative isolate flex items-center gap-4 overflow-hidden rounded-2xl bg-linear-to-br from-promo to-promo-to px-5 py-5 text-promo-foreground sm:px-8 sm:py-7",
         className,
       )}
       {...props}
@@ -32,11 +32,11 @@ function PromoBanner({
         preserveAspectRatio="none"
         className="pointer-events-none absolute inset-y-0 right-0 -z-10 h-full w-3/4 text-promo-highlight"
       >
-        <path d="M120 0 C 200 60, 260 40, 400 0 L 400 200 L 0 200 C 120 170, 70 70, 120 0 Z" fill="currentColor" opacity="0.55" />
+        <path d="M120 0 C 200 60, 260 40, 400 0 L 400 200 L 0 200 C 120 170, 70 70, 120 0 Z" fill="currentColor" opacity="0.12" />
       </svg>
       <div className="min-w-0 flex-1">
         <div className="text-lg leading-tight font-semibold sm:text-2xl">{title}</div>
-        {description && <div className="mt-1 text-sm text-promo-foreground/75 sm:text-base">{description}</div>}
+        {description && <div className="mt-1 text-sm text-promo-foreground/90 sm:text-base">{description}</div>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>

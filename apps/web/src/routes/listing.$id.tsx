@@ -81,20 +81,20 @@ function PhoneButton({
 }) {
   if (phone === "hidden") {
     return (
-      <Link to="/login" search={{ redirect: location.pathname }} className={cn("btn btn-accent", className)}>
+      <Link to="/login" search={{ redirect: location.pathname }} className={cn("btn btn-brand-outline", className)}>
         <Phone /> Telefon
       </Link>
     );
   }
   if (revealed) {
     return (
-      <a href={`tel:${phone}`} className={cn("btn btn-accent", className)}>
+      <a href={`tel:${phone}`} className={cn("btn btn-brand-outline", className)}>
         <Phone /> {phone}
       </a>
     );
   }
   return (
-    <button type="button" className={cn("btn btn-accent", className)} onClick={onReveal}>
+    <button type="button" className={cn("btn btn-brand-outline", className)} onClick={onReveal}>
       <Phone /> Arată telefonul
     </button>
   );

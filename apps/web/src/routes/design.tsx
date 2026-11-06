@@ -48,18 +48,20 @@ const SAMPLE: Card[] = [
 
 const COLORS: { name: string; token: string; className: string; note: string }[] = [
   { name: "Fundal", token: "--background", className: "bg-background", note: "Paginile sunt albe" },
-  { name: "Suprafață", token: "--surface", className: "bg-surface", note: "Plăci, poze, câmpuri" },
+  { name: "Suprafață", token: "--surface", className: "bg-surface", note: "Gri-lavandă: poze, câmpuri" },
   { name: "Suprafață tare", token: "--surface-strong", className: "bg-surface-strong", note: "Hover pe suprafețe" },
-  { name: "Cerneală", token: "--primary", className: "bg-primary", note: "Text și butonul principal" },
-  { name: "Smarald", token: "--brand", className: "bg-brand", note: "Un singur CTA „go” pe ecran" },
-  { name: "Verde închis", token: "--brand-ink", className: "bg-brand-ink", note: "Text verde pe fundal deschis" },
-  { name: "Verde pal", token: "--brand-soft", className: "bg-brand-soft", note: "Insigne pozitive" },
-  { name: "Smarald închis", token: "--promo", className: "bg-promo", note: "Bannere promoționale" },
+  { name: "Violet", token: "--primary / --brand", className: "bg-primary", note: "Acțiunea principală, stări active" },
+  { name: "Violet închis", token: "--brand-ink", className: "bg-brand-ink", note: "Linkuri, text violet" },
+  { name: "Lavandă", token: "--brand-soft", className: "bg-brand-soft", note: "Insigne, hover pe contur" },
+  { name: "Galben", token: "--highlight", className: "bg-highlight", note: "Insigne Gratuit, Nou, Top" },
+  { name: "Banner", token: "--promo → --promo-to", className: "bg-linear-to-br from-promo to-promo-to", note: "Gradient violet-albăstrui" },
+  { name: "Cerneală", token: "--ink / --foreground", className: "bg-ink", note: "Text, insigna Vândut" },
   { name: "Text secundar", token: "--muted-foreground", className: "bg-muted-foreground", note: "Meta, ajutor" },
   { name: "Bordură", token: "--border", className: "bg-border", note: "Linii fine, panouri" },
-  { name: "Coral", token: "--favorite", className: "bg-favorite", note: "Inimă plină" },
   { name: "Rating", token: "--rating", className: "bg-rating", note: "Stele" },
 ];
+
+const TINTS = ["lavender", "periwinkle", "butter", "mint", "peach", "sky", "pink", "slate"];
 
 const TYPE: { label: string; className: string; spec: string }[] = [
   { label: "Găsește orice", className: "text-display font-semibold", spec: "display · 44/46 · semibold" },
@@ -98,8 +100,9 @@ function DesignPage() {
         <Logo className="text-4xl" />
         <h1 className="mt-4 text-title font-semibold sm:text-display">Sistemul de design</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Paleta „Smarald cald”: pagini albe, suprafețe calde de piatră care țin pozele, text și butoane verde-negru,
-          smarald pentru acțiunea principală, smarald închis pentru bannere și coral pentru inimi. Colțuri rotunjite, umbre aproape deloc. Reguli complete în{" "}
+          Paleta „Violet”: pagini albe, suprafețe gri-lavandă care țin pozele, text bleumarin, violet pentru acțiunea
+          principală și stările active, galben pentru insignele care trebuie observate și nuanțe pastel pentru
+          categorii. Colțuri rotunjite, umbre aproape deloc. Reguli complete în{" "}
           <code className="rounded bg-surface px-1.5 py-0.5 text-sm">docs/DESIGN.md</code>.
         </p>
       </header>
@@ -114,6 +117,14 @@ function DesignPage() {
                 <code className="text-xs text-muted-foreground">{c.token}</code>
                 <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>
               </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {TINTS.map((t) => (
+            <div key={t} className="text-center text-xs text-muted-foreground">
+              <div className="size-14 rounded-xl" style={{ background: `var(--ofry-tint-${t})` }} />
+              <div className="mt-1">{t}</div>
             </div>
           ))}
         </div>
@@ -169,13 +180,15 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Butoane" description="Negru pentru acțiunea obișnuită, verde pentru momentul „hai” (Adaugă anunț, Sună), gri pentru restul. Maxim un buton verde pe ecran.">
+      <Block title="Butoane" description="Violet plin pentru acțiunea principală, contur violet pentru a doua acțiune de lângă ea (Sună), gri pentru restul. Un singur buton violet plin pe zonă.">
         <div className="flex flex-wrap items-center gap-3">
           <button type="button" className="btn btn-primary">Trimite mesaj</button>
           <button type="button" className="btn btn-accent">
             <Plus strokeWidth={2.5} /> Adaugă anunț
           </button>
+          <button type="button" className="btn btn-brand-outline">Sună</button>
           <button type="button" className="btn btn-secondary">Salvează</button>
+          <button type="button" className="btn btn-ink">Neutru</button>
           <button type="button" className="btn btn-outline">Intră în cont</button>
           <button type="button" className="btn btn-ghost">Anulează</button>
           <button type="button" className="btn btn-danger">Șterge</button>
@@ -194,17 +207,17 @@ function DesignPage() {
         </div>
         <div className="mt-6 flex max-w-md gap-2">
           <button type="button" className="btn btn-primary btn-lg flex-1">Trimite mesaj</button>
-          <button type="button" className="btn btn-accent btn-lg flex-1">
+          <button type="button" className="btn btn-brand-outline btn-lg flex-1">
             <Phone /> Sună
           </button>
         </div>
       </Block>
 
-      <Block title="Chips și insigne" description="Chips pentru filtre și comutatoare (negre când sunt active). Insignele sunt doar informative.">
+      <Block title="Chips și insigne" description="Chips pentru filtre și comutatoare (violet când sunt active). Insignele sunt doar informative; galbenul e pentru ce trebuie observat.">
         <div className="flex flex-wrap items-center gap-2">
           <span className="chip chip-active">Noutăți</span>
           <span className="chip pl-2">
-            <span className="flex size-6 items-center justify-center rounded-full bg-brand text-brand-foreground [&_svg]:size-3.5">
+            <span className="flex size-6 items-center justify-center rounded-full bg-highlight text-highlight-foreground [&_svg]:size-3.5">
               <Gift />
             </span>
             Gratuite
@@ -224,6 +237,7 @@ function DesignPage() {
           <span className="badge">Mobilă</span>
           <span className="badge">Folosit</span>
           <span className="badge badge-brand">Negociabil</span>
+          <span className="badge badge-highlight">Gratuit</span>
           <span className="badge badge-dark">Vândut</span>
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-8">
@@ -232,7 +246,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Câmpuri și căutare" description="Câmpurile sunt gri, fără bordură; la focus devin albe cu inel verde.">
+      <Block title="Câmpuri și căutare" description="Câmpurile sunt gri-lavandă, fără bordură; la focus devin albe cu inel violet.">
         <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
           <SearchBar size="lg" placeholder="Ce cauți azi?" className="sm:col-span-2" />
           <div>
@@ -259,7 +273,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Categorii" description="Plăci gri: pe telefon un șir orizontal cu eticheta sub poză, pe desktop o grilă cu eticheta sus și iconița jos-dreapta.">
+      <Block title="Categorii" description="Plăci pastel, câte o nuanță pe categorie: pe telefon un șir orizontal cu eticheta sub poză, pe desktop o grilă cu eticheta sus și iconița jos-dreapta.">
         <div className="scroll-rail mb-6">
           {CATEGORIES.map((c) => (
             <CategoryRailItem key={c.slug} category={c} />
@@ -272,7 +286,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Carduri de anunț" description="Poza într-un godeu gri cu colțuri de 22 px, inima în colț, apoi titlul, prețul îngroșat și o linie de meta.">
+      <Block title="Carduri de anunț" description="Poza într-un godeu gri-lavandă cu colțuri de 22 px, inima în colț (violet când e salvat), insigna galbenă Gratuit, apoi titlul, prețul îngroșat și o linie de meta.">
         <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
           {SAMPLE.map((l, i) => (
             <ListingCard key={l._id} listing={l} isFavorite={i === 1} />
@@ -280,7 +294,7 @@ function DesignPage() {
         </div>
       </Block>
 
-      <Block title="Banner promo" description="Smarald închis cu o formă mai deschisă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
+      <Block title="Banner promo" description="Gradient violet spre albastru-lavandă, cu o formă luminoasă în dreapta. Unul pe ecran, pentru mesajele Ofry.">
         <PromoBanner
           title="Vinde gratuit pe Ofry"
           description="Publici un anunț în 2 minute, fără comision."
@@ -301,7 +315,7 @@ function DesignPage() {
         />
       </Block>
 
-      <Block title="Pe telefon" description="Bara de jos cu cinci tab-uri și butonul verde de publicare în mijloc. Pagina de anunț își aduce propria bară cu Trimite mesaj și Sună.">
+      <Block title="Pe telefon" description="Bara de jos cu cinci tab-uri și butonul violet de publicare în mijloc. Pagina de anunț își aduce propria bară cu Trimite mesaj și Sună.">
         <div className="flex flex-wrap justify-center gap-10">
           <Phone375>
             <div className="space-y-4 p-4 pt-6">
@@ -320,7 +334,7 @@ function DesignPage() {
                 [<Home key="h" className="fill-current" />, "Acasă", true],
                 [<Search key="s" />, "Caută", false],
               ].map(([icon, label, active]) => (
-                <span key={label as string} className={`flex flex-1 flex-col items-center gap-1 py-2 text-[0.6875rem] font-medium [&_svg]:size-6 ${active ? "" : "text-muted-foreground"}`}>
+                <span key={label as string} className={`flex flex-1 flex-col items-center gap-1 py-2 text-[0.6875rem] font-medium [&_svg]:size-6 ${active ? "text-brand" : "text-muted-foreground"}`}>
                   {icon}
                   {label}
                 </span>
@@ -359,7 +373,7 @@ function DesignPage() {
               <span className="btn btn-primary flex-1 px-2">
                 <MessageCircle /> Mesaj
               </span>
-              <span className="btn btn-accent flex-1 px-2">
+              <span className="btn btn-brand-outline flex-1 px-2">
                 <Phone /> Sună
               </span>
             </div>

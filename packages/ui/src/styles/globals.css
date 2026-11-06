@@ -10,41 +10,52 @@
 /*
  * Ofry design tokens.
  *
- * Palette "Smarald cald" (warm emerald): white pages, warm stone surfaces that
- * hold photos and tiles, deep green-black ink for text and primary actions, an
- * emerald green for the one "go" action per screen, a deep emerald for promo
- * banners and a coral for hearts and deals. Neutrals lean warm so photos and
- * the greens both feel friendly rather than clinical.
+ * Palette "Violet": white pages, cool lavender-grey surfaces that hold photos
+ * and tiles, navy ink for text, a confident violet for every primary action
+ * and active state, a violet-to-periwinkle gradient for promo banners, a sunny
+ * yellow for highlight badges (Gratuit, Nou) and soft pastel tints for
+ * category tiles.
  *
  * See docs/DESIGN.md for usage rules and /design in the app for a live preview.
  */
 :root {
-  /* Neutral scale (warm stone) */
+  /* Neutral scale (cool lavender grey) */
   --ofry-neutral-0: #ffffff;
-  --ofry-neutral-50: #faf9f6;
-  --ofry-neutral-100: #f5f3ed;
-  --ofry-neutral-200: #e9e6de;
-  --ofry-neutral-300: #d8d4ca;
-  --ofry-neutral-500: #6b6f68;
-  --ofry-neutral-700: #3d433e;
-  --ofry-neutral-900: #1b2a23;
-  --ofry-neutral-950: #11201a;
+  --ofry-neutral-50: #f9f9fc;
+  --ofry-neutral-100: #f3f4f9;
+  --ofry-neutral-200: #e7e8f1;
+  --ofry-neutral-300: #d5d7e4;
+  --ofry-neutral-500: #676a80;
+  --ofry-neutral-700: #3c3f55;
+  --ofry-neutral-900: #1e2033;
+  --ofry-neutral-950: #151628;
 
-  /* Brand: emerald */
-  --ofry-green-50: #e3f4eb;
-  --ofry-green-100: #c4e9d5;
-  --ofry-green-400: #34c487;
-  --ofry-green-500: #0a8254;
-  --ofry-green-600: #08744b;
-  --ofry-green-700: #066640;
-  --ofry-forest-700: #155741;
-  --ofry-forest-800: #0e4533;
-  --ofry-forest-900: #0a3a2b;
+  /* Brand: violet */
+  --ofry-violet-50: #f0edff;
+  --ofry-violet-100: #e1dbff;
+  --ofry-violet-300: #b3a5ff;
+  --ofry-violet-400: #8f7cff;
+  --ofry-violet-500: #5b3fe4;
+  --ofry-violet-600: #4b30cf;
+  --ofry-violet-700: #3d25ad;
+  --ofry-periwinkle-400: #7c8cf2;
+  --ofry-periwinkle-600: #5a66dc;
 
   /* Support */
-  --ofry-coral-500: #f0553c;
-  --ofry-red-500: #d93a2b;
+  --ofry-yellow-300: #ffd43b;
+  --ofry-teal-500: #3aa9bd;
+  --ofry-red-500: #e5484d;
   --ofry-amber-400: #f5a524;
+
+  /* Pastel tints for category tiles */
+  --ofry-tint-lavender: #e4e0ff;
+  --ofry-tint-periwinkle: #dde3ff;
+  --ofry-tint-butter: #fff1b8;
+  --ofry-tint-mint: #d7f2e3;
+  --ofry-tint-peach: #ffe0d2;
+  --ofry-tint-sky: #d6eef7;
+  --ofry-tint-pink: #fbdced;
+  --ofry-tint-slate: #dfe3ec;
 
   /* Semantic roles (shadcn names kept so every primitive picks them up) */
   --background: var(--ofry-neutral-0);
@@ -53,7 +64,7 @@
   --card-foreground: var(--ofry-neutral-950);
   --popover: var(--ofry-neutral-0);
   --popover-foreground: var(--ofry-neutral-950);
-  --primary: var(--ofry-neutral-950);
+  --primary: var(--ofry-violet-500);
   --primary-foreground: var(--ofry-neutral-0);
   --secondary: var(--ofry-neutral-100);
   --secondary-foreground: var(--ofry-neutral-950);
@@ -64,80 +75,92 @@
   --destructive: var(--ofry-red-500);
   --border: var(--ofry-neutral-200);
   --input: var(--ofry-neutral-200);
-  --ring: var(--ofry-green-500);
+  --ring: var(--ofry-violet-400);
 
   /* Ofry-specific roles */
+  --ink: var(--ofry-neutral-950);
+  --ink-foreground: var(--ofry-neutral-0);
   --surface: var(--ofry-neutral-100);
   --surface-strong: var(--ofry-neutral-200);
-  --brand: var(--ofry-green-500);
+  --brand: var(--ofry-violet-500);
   --brand-foreground: var(--ofry-neutral-0);
-  --brand-ink: var(--ofry-green-700);
-  --brand-soft: var(--ofry-green-50);
-  --promo: var(--ofry-forest-900);
-  --promo-highlight: var(--ofry-forest-700);
+  --brand-ink: var(--ofry-violet-600);
+  --brand-soft: var(--ofry-violet-50);
+  --highlight: var(--ofry-yellow-300);
+  --highlight-foreground: var(--ofry-neutral-950);
+  --promo: var(--ofry-violet-500);
+  --promo-to: var(--ofry-periwinkle-600);
+  --promo-highlight: #ffffff;
   --promo-foreground: var(--ofry-neutral-0);
   --price: var(--ofry-neutral-950);
-  --favorite: var(--ofry-coral-500);
+  --favorite: var(--ofry-violet-500);
   --rating: var(--ofry-amber-400);
+  --tile-mix: 100%;
 
-  --chart-1: var(--ofry-green-400);
-  --chart-2: var(--ofry-green-600);
-  --chart-3: var(--ofry-forest-700);
-  --chart-4: var(--ofry-forest-900);
+  --chart-1: var(--ofry-violet-500);
+  --chart-2: var(--ofry-periwinkle-400);
+  --chart-3: var(--ofry-teal-500);
+  --chart-4: var(--ofry-yellow-300);
   --chart-5: var(--ofry-neutral-500);
 
   --radius: 0.875rem;
 
   --sidebar: var(--ofry-neutral-50);
   --sidebar-foreground: var(--ofry-neutral-950);
-  --sidebar-primary: var(--ofry-neutral-950);
+  --sidebar-primary: var(--ofry-violet-500);
   --sidebar-primary-foreground: var(--ofry-neutral-0);
   --sidebar-accent: var(--ofry-neutral-100);
   --sidebar-accent-foreground: var(--ofry-neutral-950);
   --sidebar-border: var(--ofry-neutral-200);
-  --sidebar-ring: var(--ofry-green-500);
+  --sidebar-ring: var(--ofry-violet-400);
 }
 
 .dark {
-  --background: #0f1512;
-  --foreground: #f3f1ea;
-  --card: #18201c;
-  --card-foreground: #f3f1ea;
-  --popover: #18201c;
-  --popover-foreground: #f3f1ea;
-  --primary: #f3f1ea;
-  --primary-foreground: #11201a;
-  --secondary: #1d2621;
-  --secondary-foreground: #f3f1ea;
-  --muted: #1d2621;
-  --muted-foreground: #a3a89f;
-  --accent: #232d27;
-  --accent-foreground: #f3f1ea;
-  --destructive: #f2705c;
+  --background: #0f1020;
+  --foreground: #eeeff7;
+  --card: #17182b;
+  --card-foreground: #eeeff7;
+  --popover: #17182b;
+  --popover-foreground: #eeeff7;
+  --primary: var(--ofry-violet-400);
+  --primary-foreground: #0f1020;
+  --secondary: #1c1d32;
+  --secondary-foreground: #eeeff7;
+  --muted: #1c1d32;
+  --muted-foreground: #a2a5bd;
+  --accent: #23253c;
+  --accent-foreground: #eeeff7;
+  --destructive: #ff6b70;
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 14%);
-  --ring: var(--ofry-green-400);
+  --ring: var(--ofry-violet-300);
 
-  --surface: #1b231f;
-  --surface-strong: #252f29;
-  --brand: var(--ofry-green-400);
-  --brand-foreground: #0b1a13;
-  --brand-ink: var(--ofry-green-400);
-  --brand-soft: #173a2b;
-  --promo: #0e4533;
-  --promo-highlight: #155741;
+  --ink: #eeeff7;
+  --ink-foreground: #0f1020;
+  --surface: #1a1b2f;
+  --surface-strong: #25273f;
+  --brand: var(--ofry-violet-400);
+  --brand-foreground: #0f1020;
+  --brand-ink: var(--ofry-violet-300);
+  --brand-soft: #29224f;
+  --highlight: #ffd43b;
+  --highlight-foreground: #151628;
+  --promo: #4b30cf;
+  --promo-to: #5f6fd6;
+  --promo-highlight: #ffffff;
   --promo-foreground: #ffffff;
-  --price: #f3f1ea;
-  --favorite: #ff7a63;
+  --price: #eeeff7;
+  --favorite: var(--ofry-violet-400);
+  --tile-mix: 18%;
 
-  --sidebar: #18201c;
-  --sidebar-foreground: #f3f1ea;
-  --sidebar-primary: var(--ofry-green-400);
-  --sidebar-primary-foreground: #0b1a13;
-  --sidebar-accent: #1d2621;
-  --sidebar-accent-foreground: #f3f1ea;
+  --sidebar: #17182b;
+  --sidebar-foreground: #eeeff7;
+  --sidebar-primary: var(--ofry-violet-400);
+  --sidebar-primary-foreground: #0f1020;
+  --sidebar-accent: #1c1d32;
+  --sidebar-accent-foreground: #eeeff7;
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: var(--ofry-green-400);
+  --sidebar-ring: var(--ofry-violet-300);
 }
 
 @theme inline {
@@ -175,6 +198,11 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
 
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-promo-to: var(--promo-to);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
   --color-brand: var(--brand);
@@ -198,11 +226,11 @@
   --radius-4xl: calc(var(--radius) + 20px);
 
   /* Elevation: the system is mostly flat; shadows only for floating things */
-  --shadow-xs: 0 1px 2px 0 oklch(0.2 0.02 150 / 0.05);
-  --shadow-sm: 0 1px 3px 0 oklch(0.2 0.02 150 / 0.06), 0 1px 2px -1px oklch(0.2 0.02 150 / 0.06);
-  --shadow-md: 0 6px 16px -6px oklch(0.2 0.02 150 / 0.14);
-  --shadow-lg: 0 16px 40px -12px oklch(0.2 0.02 150 / 0.22);
-  --shadow-bar: 0 -1px 0 0 var(--border), 0 -8px 24px -16px oklch(0.2 0.02 150 / 0.2);
+  --shadow-xs: 0 1px 2px 0 oklch(0.25 0.06 280 / 0.05);
+  --shadow-sm: 0 1px 3px 0 oklch(0.25 0.06 280 / 0.06), 0 1px 2px -1px oklch(0.25 0.06 280 / 0.06);
+  --shadow-md: 0 6px 16px -6px oklch(0.25 0.06 280 / 0.14);
+  --shadow-lg: 0 16px 40px -12px oklch(0.25 0.06 280 / 0.22);
+  --shadow-bar: 0 -1px 0 0 var(--border), 0 -8px 24px -16px oklch(0.25 0.06 280 / 0.2);
 
   /* Type scale (size / line height) */
   --text-display: 2.75rem;

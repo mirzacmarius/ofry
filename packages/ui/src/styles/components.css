@@ -10,13 +10,21 @@
   .btn {
     @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold whitespace-nowrap transition outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-[1.125rem] [&_svg]:shrink-0;
   }
-  /* Black: the default action on a screen (Trimite mesaj, Caută, Publică). */
+  /* Violet: the main action on a screen (Trimite mesaj, Caută, Publică). */
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/85;
   }
-  /* Bright green: the one "go" moment per screen (Adaugă anunț, Sună). */
+  /* Brand fill; same violet as primary, kept as its own name for the publish CTA. */
   .btn-accent {
     @apply bg-brand text-brand-foreground hover:brightness-95;
+  }
+  /* Violet outline: the second action next to a primary one (Sună, Adaugă la favorite). */
+  .btn-brand-outline {
+    @apply border-2 border-brand bg-background text-brand-ink hover:bg-brand-soft;
+  }
+  /* Navy ink fill, for neutral emphasis. */
+  .btn-ink {
+    @apply bg-ink text-ink-foreground hover:bg-ink/85;
   }
   /* Light grey: secondary actions. */
   .btn-secondary {
@@ -81,6 +89,14 @@
     @apply rounded-2xl bg-surface;
   }
 
+  /* Pastel tile: set --tile-tint inline; in dark mode the tint fades into the surface. */
+  .tile-tinted {
+    background-color: color-mix(in srgb, var(--tile-tint, var(--surface)) var(--tile-mix), var(--surface));
+  }
+  .tile-tinted:hover {
+    background-color: color-mix(in srgb, var(--tile-tint, var(--surface)) var(--tile-mix), var(--surface-strong));
+  }
+
   /* ---------- Chips and badges ---------- */
   .chip {
     @apply inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-surface px-4 text-sm font-medium whitespace-nowrap text-foreground transition outline-none hover:bg-surface-strong focus-visible:ring-3 focus-visible:ring-ring/40 [&_svg]:size-4;
@@ -100,7 +116,11 @@
     @apply bg-brand-soft text-brand-ink;
   }
   .badge-dark {
-    @apply bg-primary text-primary-foreground;
+    @apply bg-ink text-ink-foreground;
+  }
+  /* Sunny yellow for things worth spotting: Gratuit, Nou, Top. */
+  .badge-highlight {
+    @apply bg-highlight font-semibold text-highlight-foreground;
   }
 
   /* ---------- Layout helpers ---------- */

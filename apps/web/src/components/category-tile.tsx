@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 import { formatNumber } from "@/lib/format";
 
-import { CategoryIcon, categoryShortName } from "./category-icon";
+import { CategoryIcon, categoryShortName, categoryTint } from "./category-icon";
 
 /**
  * Grey tile with the label top-left and a large icon bottom-right.
@@ -15,16 +15,14 @@ export function CategoryTile({ category, count, className }: { category: Categor
     <Link
       to="/search"
       search={{ category: category.slug }}
-      className={cn(
-        "surface group relative flex aspect-[4/3] flex-col overflow-hidden p-4 transition hover:bg-surface-strong",
-        className,
-      )}
+      style={categoryTint(category.slug)}
+      className={cn("surface tile-tinted group relative flex aspect-[4/3] flex-col overflow-hidden p-4 transition", className)}
     >
       <span className="text-sm leading-snug font-medium">{category.name}</span>
       {count !== undefined && (
         <span className="mt-0.5 text-xs text-muted-foreground">{formatNumber(count)} anunțuri</span>
       )}
-      <span className="absolute -right-3 -bottom-3 flex size-24 items-center justify-center rounded-full bg-background/70 transition group-hover:scale-105">
+      <span className="absolute -right-3 -bottom-3 flex size-24 items-center justify-center rounded-full bg-background/60 transition group-hover:scale-105">
         <CategoryIcon icon={category.icon} strokeWidth={1.5} className="size-11 -translate-x-1 -translate-y-1" />
       </span>
     </Link>
@@ -39,7 +37,10 @@ export function CategoryRailItem({ category }: { category: Category }) {
       search={{ category: category.slug }}
       className="group flex w-[5.5rem] shrink-0 flex-col items-center gap-2"
     >
-      <span className="surface flex aspect-square w-full items-center justify-center transition group-hover:bg-surface-strong">
+      <span
+        style={categoryTint(category.slug)}
+        className="surface tile-tinted flex aspect-square w-full items-center justify-center transition"
+      >
         <CategoryIcon icon={category.icon} strokeWidth={1.5} className="size-9" />
       </span>
       <span className="text-center text-[0.8125rem] leading-tight font-medium">

@@ -62,7 +62,7 @@ function HomeComponent() {
           <div className="scroll-rail mx-0 flex-1 scroll-px-0 gap-2 px-0 sm:mx-0 sm:scroll-px-0 sm:px-0">
             <span className="chip chip-active">Noutăți</span>
             <Link to="/search" search={{ maxPrice: 0 }} className="chip pl-2">
-              <span className="flex size-6 items-center justify-center rounded-full bg-brand text-brand-foreground [&_svg]:size-3.5">
+              <span className="flex size-6 items-center justify-center rounded-full bg-highlight text-highlight-foreground [&_svg]:size-3.5">
                 <Gift />
               </span>
               Gratuite
@@ -74,7 +74,7 @@ function HomeComponent() {
               Sub 100 lei
             </Link>
           </div>
-          <Link to="/search" className="flex shrink-0 items-center gap-0.5 text-sm font-medium hover:underline">
+          <Link to="/search" className="flex shrink-0 items-center gap-0.5 text-sm font-semibold text-brand-ink hover:underline">
             Vezi toate <ChevronRight className="size-4" />
           </Link>
         </div>

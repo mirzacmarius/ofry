@@ -1,3 +1,4 @@
+import type * as React from "react";
 import {
   Baby,
   Bike,
@@ -47,4 +48,23 @@ const SHORT_NAMES: Record<string, string> = {
 
 export function categoryShortName(slug: string, fallback: string) {
   return SHORT_NAMES[slug] ?? fallback;
+}
+
+/** Pastel tint per category, from the --ofry-tint-* tokens. */
+const TINTS: Record<string, string> = {
+  imobiliare: "lavender",
+  auto: "slate",
+  electronice: "periwinkle",
+  "casa-gradina": "butter",
+  moda: "pink",
+  copii: "peach",
+  "sport-hobby": "mint",
+  animale: "butter",
+  "locuri-de-munca": "sky",
+  servicii: "peach",
+};
+
+/** Inline style that tints a `.tile-tinted` element for this category. */
+export function categoryTint(slug: string) {
+  return { "--tile-tint": `var(--ofry-tint-${TINTS[slug] ?? "slate"})` } as React.CSSProperties;
 }

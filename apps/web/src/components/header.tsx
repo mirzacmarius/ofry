@@ -60,7 +60,7 @@ export default function Header() {
             <UserMenu />
           </Authenticated>
           <Unauthenticated>
-            <Link to="/login" className="btn btn-primary btn-sm">
+            <Link to="/login" className="btn btn-secondary btn-sm">
               Intră în cont
             </Link>
           </Unauthenticated>

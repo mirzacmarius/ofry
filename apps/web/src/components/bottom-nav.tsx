@@ -21,7 +21,7 @@ function Item({
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex flex-1 flex-col items-center gap-1 py-2 text-[0.6875rem] font-medium transition [&_svg]:size-6",
-        active ? "text-foreground [&_svg]:fill-current" : "text-muted-foreground",
+        active ? "text-brand [&_svg]:fill-current" : "text-muted-foreground",
       )}
     >
       {icon}

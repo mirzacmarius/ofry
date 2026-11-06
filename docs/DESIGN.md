@@ -1,10 +1,11 @@
 # Ofry design system
 
-Ofry looks calm and photo-first. The palette is **Smarald cald** (warm
-emerald): white pages, warm stone wells that hold photos and tiles, deep
-green-black ink for text and buttons, one emerald "go" action per screen, a
-deep emerald for promotional banners and coral for hearts. Corners are generously rounded
-and shadows are almost absent.
+Ofry looks friendly and photo-first. The palette is **Violet**: white pages,
+cool lavender-grey wells that hold photos and tiles, navy ink for text, a
+confident violet for primary actions and active states, a violet-to-periwinkle
+gradient for promo banners, sunny yellow for badges worth spotting, and a soft
+pastel tint per category. Corners are generously rounded and shadows are
+almost absent.
 
 Live preview: open **`/design`** in the app (tokens, every component, phone mock-ups).
 
@@ -28,19 +29,23 @@ Always use the role, never a raw value. Every role has a dark-mode value.
 | Role | Tailwind | Use for |
 | --- | --- | --- |
 | `--background` | `bg-background` | Page background (white) |
-| `--surface` | `bg-surface` | Warm stone: photo wells, tiles, inputs, spec boxes |
+| `--surface` | `bg-surface` | Lavender grey: photo wells, inputs, spec boxes |
 | `--surface-strong` | `bg-surface-strong` | Hover on surfaces |
-| `--primary` | `bg-primary` / `text-foreground` | Green-black ink: text, default buttons, active chips |
-| `--brand` | `bg-brand` | Emerald: the single "go" CTA (Adaugă anunț, Sună), unread dots |
-| `--brand-ink` | `text-brand-ink` | Green text on light backgrounds |
-| `--brand-soft` | `bg-brand-soft` | Positive badges (Negociabil, Activ) |
-| `--promo` | `bg-promo` | Deep emerald promotional banners |
+| `--foreground` / `--ink` | `text-foreground`, `bg-ink` | Navy ink: text, the Vândut badge, neutral emphasis |
+| `--primary` = `--brand` | `bg-primary`, `bg-brand` | Violet: primary buttons, active chips and tabs, publish button, filled hearts |
+| `--brand-ink` | `text-brand-ink` | Violet text and links (Vezi toate) |
+| `--brand-soft` | `bg-brand-soft` | Lavender: positive badges, outline-button hover |
+| `--highlight` | `bg-highlight` | Yellow: Gratuit / Nou / Top badges, the logo dot |
+| `--promo` → `--promo-to` | `bg-linear-to-br from-promo to-promo-to` | Promo banner gradient |
+| `--ofry-tint-*` | `.tile-tinted` + `categoryTint(slug)` | Pastel category tiles (lavender, periwinkle, butter, mint, peach, sky, pink, slate) |
 | `--muted-foreground` | `text-muted-foreground` | Meta lines, help text |
 | `--border` | `border-border` | Hairlines on white panels |
-| `--price` | `text-price` | Prices (always bold) |
-| `--favorite` | `text-favorite` | Coral: filled heart |
+| `--price` | `text-price` | Prices (always bold, ink) |
+| `--favorite` | `text-favorite` | Filled heart (violet) |
 
-White text on emerald passes WCAG AA (4.7:1). In dark mode the emerald lightens and its text turns dark.
+Contrast: white on violet is 6.4:1, ink on yellow 12.5:1, white on the banner
+gradient's darker end 4.8:1. In dark mode the violet lightens and its text
+turns dark.
 
 ## Type
 
@@ -69,31 +74,31 @@ Prices: `font-bold text-price`, formatted with `formatPrice()` (`1.850 lei`, `Gr
 
 **Buttons** (`.btn` + one variant, optional size)
 
-- `btn-primary` black: the normal action (Trimite mesaj, Caută, Intră în cont).
-- `btn-accent` emerald: the one "go" moment on a screen (Adaugă anunț, Sună). Never two on one screen.
-- `btn-secondary` grey, `btn-outline`, `btn-ghost`, `btn-danger`, `btn-inverse` (white, on promo green).
+- `btn-primary` violet: the main action (Trimite mesaj, Caută). `btn-accent` is the same fill, used for the publish CTA.
+- `btn-brand-outline` violet outline: the second action next to a primary one (Sună next to Trimite mesaj).
+- One filled violet button per area; everything else is `btn-secondary` (grey), `btn-outline`, `btn-ghost`, `btn-ink`, `btn-danger`, or `btn-inverse` (white, on the promo banner).
 - Sizes: `btn-sm` (36), default (44), `btn-lg` (56, phone action bars). `btn-icon` makes it square.
 - `.icon-btn`: round translucent button for overlays on photos (heart, gallery arrows).
 
 **Chips and badges**
 
-- `.chip` for filters and toggles; active state via `aria-pressed="true"` or `.chip-active` (black). `.chip-sm` for dense rows.
-- A chip may lead with a small green circle icon (Gratuite, Sub 100 lei).
-- `.badge` is informational only: grey by default, `badge-brand` (green), `badge-dark` (Vândut).
+- `.chip` for filters and toggles; active state via `aria-pressed="true"` or `.chip-active` (violet). `.chip-sm` for dense rows.
+- A chip may lead with a small coloured circle icon (yellow for Gratuite, violet for Sub 100 lei).
+- `.badge` is informational only: grey by default, `badge-brand` (lavender), `badge-highlight` (yellow: Gratuit), `badge-dark` (ink: Vândut).
 
-**Fields**: `.field` on `input`, `select`, `textarea`. Grey and borderless; white with a green ring on focus. Labels use `.label`.
+**Fields**: `.field` on `input`, `select`, `textarea`. Lavender grey and borderless; white with a violet ring on focus. Labels use `.label`.
 
 **Search bar**: `<SearchBar />` (`size="lg"` for the home hero).
 
-**Category tiles**: `<CategoryTile />` (grey tile, label top-left, big icon bottom-right) for grids; `<CategoryRailItem />` (square tile, label below) for the horizontal rail on phones (`.scroll-rail`).
+**Category tiles**: `<CategoryTile />` (pastel tile, label top-left, big icon bottom-right) for grids; `<CategoryRailItem />` (square tile, label below) for the horizontal rail on phones (`.scroll-rail`).
 
-**Listing card**: photo in a square grey well with a heart `icon-btn`, then title, bold price, and a muted `oraș · timp` line. No border. Use `<ListingGrid />` so hearts reflect the user's favourites.
+**Listing card**: photo in a square lavender-grey well with a heart `icon-btn` and a yellow Gratuit badge for free items, then title, bold price, and a muted `oraș · timp` line. No border. Use `<ListingGrid />` so hearts reflect the user's favourites.
 
-**Promo banner**: `<PromoBanner title description action />`. Forest green with a lighter curved shape. At most one per screen, for Ofry's own messages.
+**Promo banner**: `<PromoBanner title description action />`. Violet-to-periwinkle gradient with a soft light shape. At most one per screen, for Ofry's own messages.
 
 **Section header**: `<SectionHeader title action />`, action usually `Vezi toate ›`.
 
-**Bottom nav** (phones only): Acasă, Caută, a green round publish button, Favorite, Contul meu. Active tab is ink with a filled icon. It hides on the listing page, which brings its own sticky bar (black Trimite mesaj + green Sună).
+**Bottom nav** (phones only): Acasă, Caută, a violet round publish button, Favorite, Contul meu. Active tab is violet with a filled icon. It hides on the listing page, which brings its own sticky bar (violet Trimite mesaj + violet-outline Sună).
 
 ## Copy
 

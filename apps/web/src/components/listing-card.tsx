@@ -38,7 +38,11 @@ export function ListingCard({ listing, isFavorite }: { listing: Card; isFavorite
               <ImageOff className="size-8" strokeWidth={1.5} />
             </div>
           )}
-          {listing.status === "sold" && <span className="badge badge-dark absolute top-2.5 left-2.5">Vândut</span>}
+          {listing.status === "sold" ? (
+            <span className="badge badge-dark absolute top-2.5 left-2.5">Vândut</span>
+          ) : (
+            listing.price === 0 && <span className="badge badge-highlight absolute top-2.5 left-2.5">Gratuit</span>
+          )}
         </div>
         <div className="flex flex-1 flex-col pt-2.5 pr-1">
           <h3 className="line-clamp-2 text-[0.9375rem] leading-snug">{listing.title}</h3>
