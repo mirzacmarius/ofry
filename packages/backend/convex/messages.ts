@@ -175,6 +175,9 @@ export const thread = query({
       listingStatus: listing?.status,
       imageUrl: listing?.images[0] ? await ctx.storage.getUrl(listing.images[0]) : null,
       otherName: c.buyerId === user.id ? c.sellerName : c.buyerName,
+      role: c.buyerId === user.id ? ("buyer" as const) : ("seller" as const),
+      /** When the other person last opened the conversation, for read ticks. */
+      otherReadAt: c.buyerId === user.id ? c.sellerLastReadAt : c.buyerLastReadAt,
       me: user.id,
       messages: messages.map((m) => ({
         _id: m._id,

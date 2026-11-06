@@ -114,7 +114,7 @@ export function AuthCard({
         {isSignUp ? "Ai deja cont?" : "Nu ai cont?"}{" "}
         <button
           type="button"
-          className="font-medium text-primary hover:underline"
+          className="font-medium underline underline-offset-4"
           onClick={() => {
             form.reset();
             setMode(isSignUp ? "signIn" : "signUp");

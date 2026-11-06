@@ -22,7 +22,7 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Contul meu"
-        className="flex size-10 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex size-10 items-center justify-center rounded-full bg-surface text-sm font-bold text-foreground outline-none transition hover:bg-surface-strong focus-visible:ring-3 focus-visible:ring-ring"
       >
         {initial}
       </DropdownMenuTrigger>

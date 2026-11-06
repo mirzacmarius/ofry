@@ -1,29 +1,33 @@
 import { api } from "@ofry/backend/convex/_generated/api";
 import type { Id } from "@ofry/backend/convex/_generated/dataModel";
+import { Alert } from "@ofry/ui/components/ofry-feedback";
+import { Tabs } from "@ofry/ui/components/ofry-forms";
+import { ListingRow, StatTile } from "@ofry/ui/components/ofry-market";
 import { cn } from "@ofry/ui/lib/utils";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { Eye, ImageOff, Plus, Store } from "lucide-react";
+import { Eye, MessageCircle, Plus, Store, Tag, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
-import { errorMessage, formatNumber, formatPrice, timeAgo } from "@/lib/format";
+import { errorMessage, formatNumber, timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/_auth/my-ads")({
   component: MyAdsPage,
 });
 
 const STATUS = {
-  active: { label: "Activ", className: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300" },
-  sold: { label: "Vândut", className: "bg-muted text-muted-foreground" },
-  inactive: { label: "Dezactivat", className: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300" },
+  active: { label: "Activ", className: "badge-brand" },
+  sold: { label: "Vândut", className: "badge-dark" },
+  inactive: { label: "Dezactivat", className: "" },
 } as const;
 
 type Tab = "all" | keyof typeof STATUS;
 
 function MyAdsPage() {
   const listings = useQuery(api.listings.mine);
+  const conversations = useQuery(api.messages.conversations);
   const setStatus = useMutation(api.listings.setStatus);
   const remove = useMutation(api.listings.remove);
   const [tab, setTab] = useState<Tab>("all");
@@ -39,76 +43,102 @@ function MyAdsPage() {
 
   const shown = listings?.filter((l) => tab === "all" || l.status === tab) ?? [];
   const count = (t: Tab) => listings?.filter((l) => t === "all" || l.status === t).length ?? 0;
+  const totalViews = listings?.reduce((sum, l) => sum + l.views, 0) ?? 0;
+  const buyers = conversations?.filter((c) => c.role === "seller") ?? [];
+  const waiting = buyers.filter((c) => c.unread).length;
+  const freshest = listings?.filter((l) => l.status === "active").sort((a, b) => b.views - a.views)[0];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Anunțurile mele</h1>
-        <Link to="/new" className="btn btn-primary">
+        <h1 className="text-heading font-semibold">Anunțurile mele</h1>
+        <Link to="/new" className="btn btn-accent">
           <Plus /> Anunț nou
         </Link>
       </div>
 
-      <div className="mb-4 flex gap-1 overflow-x-auto border-b">
-        {(["all", "active", "sold", "inactive"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={cn(
-              "-mb-px border-b-2 px-3 py-2 text-sm whitespace-nowrap",
-              tab === t ? "border-primary font-semibold text-primary" : "border-transparent text-muted-foreground",
-            )}
-          >
-            {t === "all" ? "Toate" : STATUS[t].label} ({count(t)})
-          </button>
-        ))}
-      </div>
+      {listings && listings.length > 0 && (
+        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile icon={<Store />} label="Active" value={formatNumber(count("active"))} />
+          <StatTile icon={<Eye />} label="Vizualizări" value={formatNumber(totalViews)} />
+          <StatTile icon={<MessageCircle />} label="Cumpărători" value={formatNumber(buyers.length)} />
+          <StatTile icon={<Tag />} label="Vândute" value={formatNumber(count("sold"))} />
+        </div>
+      )}
+
+      {waiting > 0 ? (
+        <Alert
+          className="mb-6"
+          title={waiting === 1 ? "Un cumpărător așteaptă răspunsul tău" : `${waiting} cumpărători așteaptă răspunsul tău`}
+          action={
+            <Link to="/messages" className="btn btn-primary btn-sm">
+              <MessageCircle /> Vezi mesajele
+            </Link>
+          }
+        >
+          Cine răspunde în prima oră vinde de obicei mai repede.
+        </Alert>
+      ) : freshest && freshest.views > 0 ? (
+        <Alert tone="success" className="mb-6" title={`„${freshest.title}” e cel mai văzut anunț al tău`}>
+          <span className="inline-flex items-center gap-1">
+            <TrendingUp className="size-4" /> {formatNumber(freshest.views)} vizualizări până acum.
+          </span>
+        </Alert>
+      ) : null}
+
+      <Tabs<Tab>
+        className="mb-5"
+        value={tab}
+        onValueChange={setTab}
+        tabs={(["all", "active", "sold", "inactive"] as const).map((t) => ({
+          value: t,
+          label: t === "all" ? "Toate" : STATUS[t].label,
+          count: count(t),
+        }))}
+      />
 
       {listings === undefined ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+            <div key={i} className="surface h-28 animate-pulse" />
           ))}
         </div>
       ) : shown.length === 0 ? (
-        <EmptyState icon={<Store />} title="Niciun anunț aici">
-          <Link to="/new" className="font-medium text-primary hover:underline">
-            Publică primul tău anunț
-          </Link>
+        <EmptyState
+          icon={<Store />}
+          title={tab === "all" ? "Încă nu ai anunțuri" : "Niciun anunț aici"}
+          action={
+            <Link to="/new" className="btn btn-primary">
+              <Plus /> Publică un anunț
+            </Link>
+          }
+        >
+          Publici în 2 minute, gratuit. Poze bune și un preț corect fac minuni.
         </EmptyState>
       ) : (
         <ul className="space-y-3">
           {shown.map((l) => {
             const id = l._id as Id<"listings">;
             return (
-              <li key={l._id} className="panel flex gap-4 p-3">
-                <Link to="/listing/$id" params={{ id }} className="size-24 shrink-0 overflow-hidden rounded-lg bg-muted">
-                  {l.imageUrl ? (
-                    <img src={l.imageUrl} alt="" className="size-full object-cover" />
-                  ) : (
-                    <div className="flex size-full items-center justify-center text-muted-foreground">
-                      <ImageOff className="size-6" />
-                    </div>
-                  )}
+              <li key={l._id} className="panel p-3 sm:p-4">
+                <Link to="/listing/$id" params={{ id }} className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
+                  <ListingRow
+                    image={l.imageUrl}
+                    title={l.title}
+                    price={l.price}
+                    badges={<span className={cn("badge", STATUS[l.status].className)}>{STATUS[l.status].label}</span>}
+                    meta={
+                      <span className="inline-flex items-center gap-3">
+                        <span>{timeAgo(l._creationTime)}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Eye className="size-3" /> {formatNumber(l.views)}
+                        </span>
+                      </span>
+                    }
+                  />
                 </Link>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="flex items-start gap-2">
-                    <Link to="/listing/$id" params={{ id }} className="truncate font-medium hover:underline">
-                      {l.title}
-                    </Link>
-                    <span className={cn("ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-medium", STATUS[l.status].className)}>
-                      {STATUS[l.status].label}
-                    </span>
-                  </div>
-                  <div className="font-bold">{formatPrice(l.price)}</div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{timeAgo(l._creationTime)}</span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="size-3" /> {formatNumber(l.views)}
-                    </span>
-                  </div>
-                  <div className="mt-auto flex flex-wrap gap-2 pt-2">
+                <div>
+                  <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                     <Link to="/edit/$id" params={{ id }} className="btn btn-outline btn-sm">
                       Editează
                     </Link>

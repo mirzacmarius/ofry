@@ -35,3 +35,41 @@ export function errorMessage(error: unknown) {
   if (error instanceof ConvexError) return String(error.data);
   return "A apărut o eroare. Încearcă din nou.";
 }
+
+const DAY = 86_400_000;
+
+function startOfDay(ts: number) {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+/** Compact time for lists: 14:32 today, "ieri", weekday this week, "12 oct." before. */
+export function shortTime(ts: number) {
+  const days = Math.round((startOfDay(Date.now()) - startOfDay(ts)) / DAY);
+  const d = new Date(ts);
+  if (days <= 0) return d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+  if (days === 1) return "ieri";
+  if (days < 7) return d.toLocaleDateString("ro-RO", { weekday: "short" });
+  return d.toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+}
+
+/** Clock time only, for chat bubbles. */
+export function clockTime(ts: number) {
+  return new Date(ts).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+}
+
+/** Label for a chat date divider: Azi, Ieri or "12 octombrie". */
+export function dayLabel(ts: number) {
+  const days = Math.round((startOfDay(Date.now()) - startOfDay(ts)) / DAY);
+  if (days <= 0) return "Azi";
+  if (days === 1) return "Ieri";
+  const d = new Date(ts);
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString("ro-RO", { day: "numeric", month: "long", ...(sameYear ? {} : { year: "numeric" }) });
+}
+
+/** "martie 2025" style, for "Pe Ofry din …". */
+export function monthYear(ts: number) {
+  return new Date(ts).toLocaleDateString("ro-RO", { month: "long", year: "numeric" });
+}

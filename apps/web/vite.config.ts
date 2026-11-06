@@ -25,7 +25,7 @@ export default defineConfig({
         name: "Ofry.ro",
         short_name: "Ofry",
         description: "Anunțuri gratuite din toată România",
-        theme_color: "#2563eb",
+        theme_color: "#ffffff",
       },
       pwaAssets: { disabled: false, config: true },
       devOptions: { enabled: true },

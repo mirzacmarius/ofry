@@ -45,6 +45,31 @@ function validate(input: {
   }
 }
 
+/**
+ * Typical price band (25th to 75th percentile) of other active listings in the
+ * same subcategory, or null when there are too few to say anything useful.
+ */
+async function similarPriceRange(
+  ctx: QueryCtx,
+  listing: { _id: Id<"listings">; category: string; subcategory: string },
+) {
+  const similar = await ctx.db
+    .query("listings")
+    .withIndex("by_status_category", (i) => i.eq("status", "active").eq("category", listing.category))
+    .order("desc")
+    .take(400);
+  const prices = similar
+    .filter((l) => l.subcategory === listing.subcategory && l._id !== listing._id && l.price > 0)
+    .map((l) => l.price)
+    .sort((a, b) => a - b);
+  if (prices.length < 5) return null;
+  const at = (q: number) => prices[Math.min(prices.length - 1, Math.floor(q * (prices.length - 1)))]!;
+  const low = at(0.25);
+  const high = at(0.75);
+  if (high <= low) return null;
+  return { low, high, count: prices.length };
+}
+
 export const search = query({
   args: {
     q: v.optional(v.string()),
@@ -148,12 +173,13 @@ export const get = query({
           .withIndex("by_user_listing", (i) => i.eq("userId", user.id).eq("listingId", id))
           .unique()
       : null;
-    const sellerListingCount = (
-      await ctx.db
-        .query("listings")
-        .withIndex("by_seller", (i) => i.eq("sellerId", listing.sellerId))
-        .collect()
-    ).filter((l) => l.status === "active").length;
+    const sellerListings = await ctx.db
+      .query("listings")
+      .withIndex("by_seller", (i) => i.eq("sellerId", listing.sellerId))
+      .collect();
+    const sellerListingCount = sellerListings.filter((l) => l.status === "active").length;
+    const sellerSince = Math.min(...sellerListings.map((l) => l._creationTime));
+    const priceStats = listing.price > 0 ? await similarPriceRange(ctx, listing) : null;
 
     const { searchText: _searchText, ...rest } = listing;
     return {
@@ -164,6 +190,8 @@ export const get = query({
       isOwner,
       isFavorite: !!favorite,
       sellerListingCount,
+      sellerSince,
+      priceStats,
     };
   },
 });
@@ -193,6 +221,8 @@ export const bySeller = query({
     const active = listings.filter((l) => l.status === "active");
     return {
       sellerName: listings[0]?.sellerName ?? null,
+      sellerSince: listings.length ? Math.min(...listings.map((l) => l._creationTime)) : null,
+      soldCount: listings.filter((l) => l.status === "sold").length,
       listings: await Promise.all(active.map((l) => toCard(ctx, l))),
     };
   },
