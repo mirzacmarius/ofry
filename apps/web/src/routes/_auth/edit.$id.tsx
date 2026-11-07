@@ -35,7 +35,7 @@ function EditListingPage() {
     county: listing.county,
     city: listing.city,
     phone: listing.phone ?? "",
-    images: listing.images,
+    images: listing.images.flatMap((i) => (i.storageId ? [{ storageId: i.storageId, url: i.url }] : [])),
     year: str(listing.year),
     mileage: str(listing.mileage),
     fuel: listing.fuel ?? "",

@@ -4,15 +4,36 @@ import { PromoBanner, SectionHeader } from "@ofry/ui/components/ofry";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { ChevronRight, Gift, MessageCircle, ShieldCheck, Store, Tag } from "lucide-react";
+import { useState } from "react";
 
 import { CategoryRailItem, CategoryTile } from "@/components/category-tile";
 import { EmptyState } from "@/components/empty-state";
-import { ListingGrid, ListingGridSkeleton } from "@/components/listing-card";
+import { ListingCard, ListingGrid, ListingGridSkeleton } from "@/components/listing-card";
 import { SearchBar } from "@/components/search-bar";
+import { recentListings } from "@/lib/local-history";
+import { useFavoriteIds } from "@/lib/use-favorite-ids";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
 });
+
+function RecentlyViewed() {
+  const [recent] = useState(recentListings);
+  const favoriteIds = useFavoriteIds();
+  if (recent.length === 0) return null;
+  return (
+    <section>
+      <SectionHeader title="Văzute recent" />
+      <div className="scroll-rail gap-3 sm:gap-4">
+        {recent.map((l) => (
+          <div key={l._id} className="w-40 shrink-0 sm:w-48">
+            <ListingCard listing={l} isFavorite={favoriteIds.has(l._id)} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function HomeComponent() {
   const latest = useQuery(api.listings.latest, { limit: 16 });
@@ -46,6 +67,8 @@ function HomeComponent() {
           ))}
         </div>
       </section>
+
+      <RecentlyViewed />
 
       <PromoBanner
         title="Vinde gratuit pe Ofry"

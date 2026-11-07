@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -109,6 +110,20 @@ export function AuthCard({
           )}
         </form.Subscribe>
       </form>
+
+      {isSignUp && (
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Creând un cont accepți{" "}
+          <Link to="/terms" className="underline underline-offset-2">
+            Termenii
+          </Link>{" "}
+          și{" "}
+          <Link to="/privacy" className="underline underline-offset-2">
+            Politica de confidențialitate
+          </Link>
+          .
+        </p>
+      )}
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {isSignUp ? "Ai deja cont?" : "Nu ai cont?"}{" "}

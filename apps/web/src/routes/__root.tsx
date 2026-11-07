@@ -39,14 +39,27 @@ function NotFound() {
   );
 }
 
+const FOOTER_LINKS = [
+  { to: "/help", label: "Ajutor" },
+  { to: "/terms", label: "Termeni" },
+  { to: "/privacy", label: "Confidențialitate" },
+  { to: "/contact", label: "Contact" },
+] as const;
+
 function Footer() {
   return (
     <footer className="mt-16 border-t border-border pb-20 md:pb-0">
-      <div className="container-page flex flex-col gap-3 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <div className="container-page flex flex-col gap-4 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
         <span className="flex items-center gap-3">
           <Logo className="text-xl text-foreground" />© {new Date().getFullYear()} Ofry.ro
         </span>
-        <span>Cumpără și vinde simplu, în toată România.</span>
+        <nav aria-label="Informații" className="flex flex-wrap gap-x-5 gap-y-2">
+          {FOOTER_LINKS.map((l) => (
+            <Link key={l.label} to={l.to} className="hover:text-foreground hover:underline">
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </footer>
   );

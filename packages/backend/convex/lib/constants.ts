@@ -151,3 +151,27 @@ export const FUELS = ["Benzină", "Motorină", "GPL", "Hibrid", "Electric"];
 export const GEARBOXES = ["Manuală", "Automată"];
 
 export const MAX_IMAGES = 10;
+
+const leiFormat = new Intl.NumberFormat("ro-RO");
+
+/** "1.250 lei", or "Gratuit" for 0. Same wording as the web app. */
+export function formatLei(price: number) {
+  return price === 0 ? "Gratuit" : `${leiFormat.format(price)} lei`;
+}
+
+export const REPORT_REASONS = [
+  { value: "fraud", label: "Pare o înșelătorie", description: "Cere plata în avans, linkuri ciudate, preț prea bun" },
+  { value: "sold", label: "Produsul nu mai e disponibil", description: "E vândut, dar anunțul e încă activ" },
+  { value: "duplicate", label: "Anunț duplicat", description: "Același produs publicat de mai multe ori" },
+  { value: "wrong_category", label: "Categorie greșită", description: "Nu e în locul potrivit" },
+  { value: "prohibited", label: "Conținut interzis", description: "Arme, droguri, animale protejate, conținut ofensator" },
+  { value: "other", label: "Alt motiv", description: "Spune-ne mai jos ce s-a întâmplat" },
+] as const;
+
+export type ReportReason = (typeof REPORT_REASONS)[number]["value"];
+
+/** How long a listing stays up before it needs renewing. */
+export const LISTING_DAYS = 30;
+/** Renewing is offered this many days before expiry. */
+export const RENEW_WINDOW_DAYS = 7;
+export const DAY_MS = 86_400_000;

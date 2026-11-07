@@ -2,7 +2,7 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth/minimal";
 
-import { components } from "./_generated/api";
+import { components, internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 import authConfig from "./auth.config";
@@ -19,6 +19,15 @@ function createAuth(ctx: GenericCtx<DataModel>) {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+    },
+    user: {
+      deleteUser: {
+        enabled: true,
+        // Remove the user's listings, favorites and the rest before the account goes.
+        beforeDelete: async (user) => {
+          if ("runMutation" in ctx) await ctx.runMutation(internal.account.purgeUserData, { userId: user.id });
+        },
+      },
     },
     plugins: [
       crossDomain({ siteUrl }),

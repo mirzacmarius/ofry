@@ -17,7 +17,8 @@ import { useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { CategoryIcon, categoryShortName, categoryTintName } from "@/components/category-icon";
-import { errorMessage } from "@/lib/format";
+import { errorMessage, uploadErrorMessage } from "@/lib/format";
+import { uploadImage } from "@/lib/upload";
 
 export type UploadedImage = { storageId: Id<"_storage">; url: string | null };
 
@@ -60,8 +61,6 @@ export const emptyListingForm: ListingFormValues = {
   rooms: "",
   area: "",
 };
-
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 function num(value: string) {
   const n = Number(value.replace(/\s/g, "").replace(",", "."));
@@ -139,19 +138,10 @@ function ImageUploader({
     const added: UploadedImage[] = [];
     for (const file of selected) {
       try {
-        if (!file.type.startsWith("image/")) throw new Error(`${file.name} nu este o imagine.`);
-        if (file.size > MAX_FILE_BYTES) throw new Error(`${file.name} depășește 8 MB.`);
-        const url = await generateUploadUrl();
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-        if (!res.ok) throw new Error("Încărcarea a eșuat.");
-        const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+        const storageId = await uploadImage(file, generateUploadUrl);
         added.push({ storageId, url: URL.createObjectURL(file) });
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : errorMessage(err));
+        toast.error(uploadErrorMessage(err));
       } finally {
         setUploading((n) => n - 1);
       }

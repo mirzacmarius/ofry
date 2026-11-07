@@ -40,14 +40,26 @@ export function ListingCard({ listing, isFavorite }: { listing: Card; isFavorite
           )}
           {listing.status === "sold" ? (
             <span className="badge badge-dark absolute top-2.5 left-2.5">Vândut</span>
+          ) : listing.price === 0 ? (
+            <span className="badge badge-highlight absolute top-2.5 left-2.5">Gratuit</span>
           ) : (
-            listing.price === 0 && <span className="badge badge-highlight absolute top-2.5 left-2.5">Gratuit</span>
+            listing.previousPrice !== undefined &&
+            listing.previousPrice > listing.price && (
+              <span className="badge badge-highlight absolute top-2.5 left-2.5">
+                −{Math.round(((listing.previousPrice - listing.price) / listing.previousPrice) * 100)}%
+              </span>
+            )
           )}
         </div>
         <div className="flex flex-1 flex-col pt-2.5 pr-1">
           <h3 className="line-clamp-2 text-[0.9375rem] leading-snug">{listing.title}</h3>
           {extra && <p className="mt-0.5 text-xs text-muted-foreground">{extra}</p>}
-          <div className="mt-1 text-base font-bold text-price sm:text-lg">{formatPrice(listing.price)}</div>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+            <span className="text-base font-bold text-price sm:text-lg">{formatPrice(listing.price)}</span>
+            {listing.previousPrice !== undefined && listing.previousPrice > listing.price && (
+              <span className="text-xs text-muted-foreground line-through">{formatPrice(listing.previousPrice)}</span>
+            )}
+          </div>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {listing.city} · {timeAgo(listing._creationTime)}
           </p>

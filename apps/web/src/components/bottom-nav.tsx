@@ -10,7 +10,7 @@ function Item({
   active,
   icon,
 }: {
-  to: "/" | "/search" | "/favorites" | "/my-ads" | "/login";
+  to: "/" | "/search" | "/favorites" | "/account" | "/login";
   label: string;
   active: boolean;
   icon: ReactNode;
@@ -55,9 +55,9 @@ export function BottomNav() {
         </div>
         <Item to="/favorites" label="Favorite" active={pathname === "/favorites"} icon={<Heart />} />
         <Item
-          to={isAuthenticated ? "/my-ads" : "/login"}
+          to={isAuthenticated ? "/account" : "/login"}
           label="Contul meu"
-          active={pathname === "/my-ads" || pathname === "/login"}
+          active={["/account", "/my-ads", "/login", "/saved-searches", "/notifications"].includes(pathname)}
           icon={<User />}
         />
       </div>

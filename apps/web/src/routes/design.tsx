@@ -25,7 +25,7 @@ function photo(category: string, subcategory: string, seed: number) {
 
 const HOUR = 3_600_000;
 const SAMPLE: Card[] = [
-  { title: "Fotoliu tapițat, verde, ca nou", price: 450, category: "casa-gradina", subcategory: "mobila", city: "Cluj-Napoca", county: "Cluj", age: 2 },
+  { title: "Fotoliu tapițat, verde, ca nou", price: 450, previousPrice: 520, category: "casa-gradina", subcategory: "mobila", city: "Cluj-Napoca", county: "Cluj", age: 2 },
   { title: "iPhone 13, 128 GB, baterie 89%", price: 1850, category: "electronice", subcategory: "telefoane", city: "București", county: "București", age: 5 },
   { title: "Bicicletă de oraș, cadru aluminiu", price: 0, category: "sport-hobby", subcategory: "biciclete", city: "Iași", county: "Iași", age: 30 },
   { title: "Dacia Logan 1.0 SCe", price: 38500, category: "auto", subcategory: "autoturisme", city: "Brașov", county: "Brașov", age: 80, year: 2019, mileage: 64000, status: "sold" as const },
@@ -34,6 +34,7 @@ const SAMPLE: Card[] = [
   _creationTime: Date.now() - s.age * HOUR,
   title: s.title,
   price: s.price,
+  previousPrice: "previousPrice" in s ? s.previousPrice : undefined,
   negotiable: true,
   category: s.category,
   subcategory: s.subcategory,
